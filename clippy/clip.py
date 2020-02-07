@@ -35,7 +35,12 @@ class CommandParam(object):
 
     def __init__(self, name: str, details: str, annotation, default_value, has_default, index):
         self._name = name
-        self._details = details
+
+        if details is None:
+            self._details = "No documentation provided."
+        else:
+            self._details = details
+
         self._annotation = annotation
         self.default_value = default_value
         self.has_default = has_default
@@ -44,7 +49,7 @@ class CommandParam(object):
     def __str__(self):
         common = f":param {self._name}:"
 
-        if self.annotation is None:
+        if self.annotation is not None:
             common = f"{common} ({self.annotation})"
 
         if self.has_default:
@@ -80,7 +85,12 @@ class CommandMethod(object):
 
     def __init__(self, name: str, main_doc: str, param_doc: Dict[str, CommandParam], return_doc: str, defn: FunctionDef, return_anno, impl):
         self._name = name
-        self._main = main_doc
+
+        if main_doc is None:
+            self._main = "No documentation provided."
+        else:
+            self._main = main_doc
+
         self._params = param_doc
         self._return = CommandReturn(return_doc, return_anno)
         self._def = defn
@@ -101,6 +111,8 @@ class CommandMethod(object):
             if param.has_default:
                 if param.annotation is bool:
                     result += f"[--{param.name}] "
+                elif param.annotation is None:
+                    result += f"[--{param.name}=<{param.name[:2]}>] "
                 else:
                     result += f"[--{param.name}=<{param.annotation.__name__}>] "
             else:
@@ -140,19 +152,38 @@ def parse_function_definition(func_def: ast.FunctionDef, module) -> Optional[Com
     if not is_cli_param:
         return None
 
-    all_docs = ast.get_docstring(func_def).split("\n")
-    all_docs = list(map(lambda x: x.strip(), filter(lambda x: x != "", all_docs)))
+    docstring = ast.get_docstring(func_def)
+
+    if docstring is None:
+        all_docs = [None]
+        param_docs = dict()
+    else:
+        all_docs = ast.get_docstring(func_def).split("\n")
+        all_docs = list(map(lambda x: x.strip(), filter(lambda x: x != "", all_docs)))
+        param_docs = dict()
+
+        for doc in all_docs[1:-1]:
+            split = list(filter(lambda x: x != "", map(lambda x: x.strip(), doc.split(":"))))
+            param_docs[split[0].replace("param ", "")] = split[1]
+
     func_annotations = func_impl.__annotations__
     default_args = dict(get_default_args(func_impl))
 
     params = dict()
+    func_args = func_def.args.args
 
-    for (idx, doc) in enumerate(all_docs[1:-1]):
-        test = doc.split(":")
-        test = list(filter(lambda x: x != "", test))
-        param_name = test[0].replace("param", "").strip()
-        param_deet = test[1].strip()
-        param_anno = func_annotations[param_name]
+    for (idx, arg) in enumerate(func_args):
+        param_name = arg.arg
+
+        if param_name in param_docs.keys():
+            param_deet = param_docs[param_name]
+        else:
+            param_deet = None
+
+        if param_name in func_annotations:
+            param_anno = func_annotations[param_name]
+        else:
+            param_anno = None
 
         if param_name in default_args.keys():
             has_default = True
@@ -169,7 +200,10 @@ def parse_function_definition(func_def: ast.FunctionDef, module) -> Optional[Com
     else:
         return_annotation = None
 
-    return_doc = all_docs[-1].replace(":return:", "").strip()
+    if docstring is None:
+        return_doc = None
+    else:
+        return_doc = all_docs[-1].replace(":return:", "").strip()
 
     return CommandMethod(name, all_docs[0], params, return_doc, func_def, return_annotation, func_impl)
 
@@ -181,7 +215,11 @@ def get_default_args(func):
 
 
 def print_help_info(parent_module, parent_module_name, command_list):
-    print(parent_module.__doc__.strip())
+    if parent_module.__doc__ is None:
+        print("No documentation provided.")
+    else:
+        print(parent_module.__doc__.strip())
+
     print("")
     print("Usage:")
 

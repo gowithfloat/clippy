@@ -3,4 +3,4 @@ venv
 build
 dist
 *.egg-info
-
+.idea
