@@ -3,7 +3,7 @@ import setuptools
 import sys
 
 this_version = sys.version_info[:2]
-reqd_version = (3, 5)
+reqd_version = (3, 6)
 
 if this_version < reqd_version:
     sys.stderr.write("Python version is not high enough to run this library.")
@@ -16,7 +16,7 @@ with open(os.path.join(this_folder, "readme.md"), encoding="utf-8") as f:
 
 setuptools.setup(
     name="Clippy",
-    version="0.1.0",
+    version="0.2.0",
     author="Steve Richey",
     author_email="srichey@gowithfloat.com",
     description="Clippy generates command-line interfaces for Python modules.",
@@ -28,11 +28,11 @@ setuptools.setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
-        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     entry_points="""
         [console_scripts]
     """
