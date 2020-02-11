@@ -1,4 +1,4 @@
-# 👀📎 [Clippy](https://github.com/gowithfloat/clippy) [![Build Status](https://travis-ci.org/gowithfloat/clippy.svg?branch=master)](https://travis-ci.org/gowithfloat/clippy) [![MIT](https://img.shields.io/badge/license-MIT-green)](./license.md)
+# 👀📎 [Clippy](https://github.com/gowithfloat/clippy) [![Build Status](https://travis-ci.org/gowithfloat/clippy.svg?branch=master)](https://travis-ci.org/gowithfloat/clippy) [![MIT](https://img.shields.io/badge/license-MIT-green)](./license.md) [![codecov](https://codecov.io/gh/gowithfloat/clippy/branch/master/graph/badge.svg)](https://codecov.io/gh/gowithfloat/clippy)
 
 Clippy (Command Line Interface Parser for Python) crawls the abstract syntax tree (AST) of a Python file and generates a simple command-line interface.
 
