@@ -100,5 +100,10 @@ def documented_one_typed_documented_parameter(arg: str):
     return f"one_documented_parameter arg: {arg}"
 
 
+@clippy
+def typed_return() -> str:
+    return "typed_return"
+
+
 if __name__ == "__main__":
     begin_clippy()

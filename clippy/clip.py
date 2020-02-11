@@ -11,126 +11,14 @@ import ast
 import sys
 import inspect
 import importlib
-from typing import List, Dict, Optional
-from ast import FunctionDef
+from typing import Dict, Optional
+from .command_param import CommandParam
+from .command_method import CommandMethod
 
 
 def clippy(func):
     func._is_clippy_action = True
     return func
-
-
-class CommandParam(object):
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def details(self):
-        return self._details
-
-    @property
-    def annotation(self):
-        return self._annotation
-
-    def __init__(self, name: str, details: str, annotation, default_value, has_default, index):
-        self._name = name
-
-        if details is None:
-            self._details = "No documentation provided."
-        else:
-            self._details = details
-
-        self._annotation = annotation
-        self.default_value = default_value
-        self.has_default = has_default
-        self.index = index
-
-    def __str__(self):
-        common = f":param {self._name}:"
-
-        if self.annotation is not None:
-            common = f"{common} ({self.annotation})"
-
-        if self.has_default:
-            return f"{common} {self._details} Default is {self.default_value}."
-        else:
-            return f"{common} {self._details}"
-
-
-class CommandReturn(object):
-    def __init__(self, details: str, anno):
-        self._details = details
-        self.annotation = anno
-
-    def __str__(self):
-        if self.annotation is None:
-            return f":return: {self._details}"
-        else:
-            return f":return: ({self.annotation}) {self._details}"
-
-
-class CommandMethod(object):
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def details(self):
-        return self._main
-
-    @property
-    def params(self) -> Dict[str, CommandParam]:
-        return self._params
-
-    def __init__(self, name: str, main_doc: str, param_doc: Dict[str, CommandParam], return_doc: str, defn: FunctionDef, return_anno, impl):
-        self._name = name
-
-        if main_doc is None:
-            self._main = "No documentation provided."
-        else:
-            self._main = main_doc
-
-        self._params = param_doc
-        self._return = CommandReturn(return_doc, return_anno)
-        self._def = defn
-        self._impl = impl
-
-    def required_params(self):
-        result = list(filter(lambda x: not x.has_default, self._params.values()))
-        result.sort(key=lambda x: x.index)
-        return result
-
-    def call(self, args):
-        return self._impl(**args)
-
-    def short_params(self):
-        result = ""
-
-        for param in self.params.values():
-            if param.has_default:
-                if param.annotation is bool:
-                    result += f"[--{param.name}] "
-                elif param.annotation is None:
-                    result += f"[--{param.name}=<{param.name[:2]}>] "
-                else:
-                    result += f"[--{param.name}=<{param.annotation.__name__}>] "
-            else:
-                result += f"<{param.name}> "
-
-        return result
-
-    def __str__(self):
-        parm = "\n".join(map(str, self._params.values()))
-        return f"""
-{self._name}: {self._main}
-
-Parameters:
-{parm}
-
-Returns:
-{self._return}
-"""
 
 
 def top_level_functions(body):
@@ -139,7 +27,7 @@ def top_level_functions(body):
             yield func
 
 
-def parse_ast(filename):
+def parse_ast(filename: str):
     with open(filename, "rt") as file:
         return ast.parse(file.read(), filename=filename)
 
@@ -176,14 +64,14 @@ def parse_function_definition(func_def: ast.FunctionDef, module) -> Optional[Com
         param_name = arg.arg
 
         if param_name in param_docs.keys():
-            param_deet = param_docs[param_name]
+            param_deet: Optional[str] = param_docs[param_name]
         else:
-            param_deet = None
+            param_deet: Optional[str] = None
 
         if param_name in func_annotations:
-            param_anno = func_annotations[param_name]
+            param_anno: Optional[type] = func_annotations[param_name]
         else:
-            param_anno = None
+            param_anno: Optional[type] = None
 
         if param_name in default_args.keys():
             has_default = True
@@ -214,22 +102,20 @@ def get_default_args(func):
             yield key, val.default
 
 
-def print_help_info(parent_module, parent_module_name, command_list):
+def print_help_info(parent_module, parent_module_name: str, command_list: Dict[str, CommandMethod]):
     if parent_module.__doc__ is None:
         print("No documentation provided.")
     else:
         print(parent_module.__doc__.strip())
 
-    print("")
-    print("Usage:")
+    print("\nUsage:")
 
     for (key, val) in command_list.items():
         print(f"  python -m {parent_module_name} {key} {val.short_params()}")
 
     print(f"  python -m {parent_module_name} --help")
     print(f"  python -m {parent_module_name} --version")
-    print(f"")
-    print("Options:")
+    print("\nOptions:")
     print("  --{:20}  {}".format("help", "Show this screen."))
     print("  --{:20}  {}".format("version", "Show version information."))
 
@@ -365,25 +251,24 @@ def begin_clippy():
     # print help info if requested
     if "help" in param_pairs:
         print(method.details)
-        print("")
-        print("Usage:")
+        print("\nUsage:")
         print(f"  python -m {parent_module_name} {method.name} {method.short_params()}")
-        print("")
-        print("Positional arguments:")
 
-        for param in method.params.values():
-            if not param.has_default:
-                print("  {:20}  {}".format(param.name, param.details))
+        if len(method.params) > 0:
+            print("\nPositional arguments:")
 
-        print("")
-        print("Options:")
+            for param in method.params.values():
+                if not param.has_default:
+                    print("  {:20}  {}".format(param.name, param.details))
+
+        print("\nOptions:")
         print("  --{:20}  {}".format("help", "Show this screen."))
 
         for param in method.params.values():
             if param.has_default:
                 print("  --{:20}  {}".format(param.name, param.details))
 
-        exit()
+        sys.exit(0)
 
     # verify that we have all required arguments
     for val in required:

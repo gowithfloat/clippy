@@ -3,3 +3,5 @@ mypy
 pytype
 flake8
 hypothesis
+codecov
+coverage
