@@ -1,4 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+A simple example.
+"""
+
 from clippy import clippy, begin_clippy
+
+__version__ = "0.0.1"
 
 
 @clippy

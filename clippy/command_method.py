@@ -3,10 +3,14 @@
 
 
 from ast import FunctionDef
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from .command_param import CommandParam
 from .command_return import CommandReturn
+
+
+def _right_pad(string, count):
+    return string + " " * (len(string) - count)
 
 
 class CommandMethod(object):
@@ -22,7 +26,7 @@ class CommandMethod(object):
     def params(self) -> Dict[str, CommandParam]:
         return self._params
 
-    def __init__(self, name: str, main_doc: str, param_doc: Dict[str, CommandParam], return_doc: str, defn: FunctionDef, return_anno, impl):
+    def __init__(self, name: str, main_doc: Optional[str], param_doc: Dict[str, CommandParam], return_doc: str, defn: FunctionDef, return_anno, impl):
         self._name = name
 
         if main_doc is None:
@@ -39,6 +43,17 @@ class CommandMethod(object):
         result = list(filter(lambda x: not x.has_default, self._params.values()))
         result.sort(key=lambda x: x.index)
         return result
+
+    def optional_params(self) -> List[CommandParam]:
+        result = list(filter(lambda x: x.has_default, self._params.values()))
+        result.sort(key=lambda x: x.index)
+        return result
+
+    def longest_param_name_length(self) -> int:
+        if len(self.params) < 1:
+            return 0
+
+        return len(max(self.params.keys(), key=len))
 
     def call(self, args: Dict):
         return self._impl(**args)
@@ -59,14 +74,20 @@ class CommandMethod(object):
 
         return result
 
-    def __str__(self):
-        parm = "\n".join(map(str, self._params.values()))
-        return f"""
-{self._name}: {self._main}
+    def print_help(self, module_name):
+        print(self.details)
+        print("\nUsage:")
+        print(f"\tpython -m {module_name} {self.name} {self.short_params()}")
+        longest = self.longest_param_name_length()
 
-Parameters:
-{parm}
+        if len(self.params) > 0:
+            print("\nPositional arguments:")
 
-Returns:
-{self._return}
-"""
+            for param in self.required_params():
+                print("\t{}\t{}".format(_right_pad(param.name, longest), param.details))
+
+        print("\nOptions:")
+        print("\t--{}\t{}".format("help", "Show this screen."))
+
+        for param in self.optional_params():
+            print("\t--{}\t{}".format(_right_pad(param.name, longest), param.details))

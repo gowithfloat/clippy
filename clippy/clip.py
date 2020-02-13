@@ -11,14 +11,19 @@ import ast
 import sys
 import inspect
 import importlib
-from typing import Dict, Optional
+import os
+from typing import Dict, Optional, Tuple, List, Iterator, Sized
 from .command_param import CommandParam
 from .command_method import CommandMethod
 
 
 def clippy(func):
-    func._is_clippy_action = True
+    func._is_clippy_command = True
     return func
+
+
+def is_clippy_command(func):
+    return hasattr(func, "_is_clippy_command")
 
 
 def top_level_functions(body):
@@ -28,31 +33,99 @@ def top_level_functions(body):
 
 
 def parse_ast(filename: str):
+    if not isinstance(filename, str):
+        raise TypeError("Input filename must be a string")
+
+    if not os.path.exists(filename):
+        raise ValueError(f"File not found: {filename}")
+
+    if os.path.isdir(filename):
+        raise ValueError(f"Path is not file: {filename}")
+
     with open(filename, "rt") as file:
-        return ast.parse(file.read(), filename=filename)
+        result = ast.parse(file.read(), filename=filename)
+
+    if result is None:
+        raise ValueError(f"Unable to parse file {filename}")
+
+    return result
+
+
+def list_first(lst):
+    if is_empty(lst):
+        return None
+
+    if isinstance(lst, list):
+        return lst[0]
+
+    return next(lst, None)
+
+
+def list_last(lst):
+    if is_empty(lst):
+        return None
+
+    if isinstance(lst, list):
+        return lst[-1]
+
+    item = None
+
+    for item in lst:
+        pass
+
+    return item
+
+
+def string_remove(str1, str2):
+    return str1.replace(str2, "")
+
+
+def is_empty(iterable) -> bool:
+    if isinstance(iterable, Sized):
+        return len(iterable) < 1
+
+    return not iterable
+
+
+def function_docs_from_string(docstring):
+    if docstring is None or len(docstring) < 1:
+        return None, None, None
+
+    all_docs = docstring.split("\n")
+
+    if is_empty(all_docs):
+        return None, None, None
+
+    all_docs = list(map(lambda x: x.strip(), filter(lambda x: x != "", all_docs)))
+
+    if is_empty(all_docs):
+        return None, None, None
+
+    has_return = not is_empty(filter(lambda x: ":return:" in x, all_docs))
+    param_docs = dict()
+    param_list = list(all_docs)[1:-1] if has_return else list(all_docs)[1:]
+
+    for doc in param_list:
+        split = list(filter(lambda x: x != "", map(lambda x: x.strip(), doc.split(":"))))
+        param_docs[list_first(split).replace("param ", "")] = split[1]
+
+    return_doc = None
+
+    if has_return:
+        return_doc = string_remove(list_last(all_docs), ":return:").strip()
+
+    return list_first(all_docs), param_docs, return_doc
 
 
 def parse_function_definition(func_def: ast.FunctionDef, module) -> Optional[CommandMethod]:
     name = func_def.name
     func_impl = getattr(module, name)
-    is_cli_param = hasattr(func_impl, "_is_clippy_action")
 
-    if not is_cli_param:
+    if not is_clippy_command(func_impl):
         return None
 
     docstring = ast.get_docstring(func_def)
-
-    if docstring is None:
-        all_docs = [None]
-        param_docs = dict()
-    else:
-        all_docs = ast.get_docstring(func_def).split("\n")
-        all_docs = list(map(lambda x: x.strip(), filter(lambda x: x != "", all_docs)))
-        param_docs = dict()
-
-        for doc in all_docs[1:-1]:
-            split = list(filter(lambda x: x != "", map(lambda x: x.strip(), doc.split(":"))))
-            param_docs[split[0].replace("param ", "")] = split[1]
+    method_docs, all_param_docs, return_doc = function_docs_from_string(docstring)
 
     func_annotations = func_impl.__annotations__
     default_args = dict(get_default_args(func_impl))
@@ -62,38 +135,18 @@ def parse_function_definition(func_def: ast.FunctionDef, module) -> Optional[Com
 
     for (idx, arg) in enumerate(func_args):
         param_name = arg.arg
-
-        if param_name in param_docs.keys():
-            param_deet: Optional[str] = param_docs[param_name]
-        else:
-            param_deet: Optional[str] = None
-
-        if param_name in func_annotations:
-            param_anno: Optional[type] = func_annotations[param_name]
-        else:
-            param_anno: Optional[type] = None
-
-        if param_name in default_args.keys():
-            has_default = True
-            default_value = default_args[param_name]
-        else:
-            has_default = False
-            default_value = None
-
-        param = CommandParam(param_name, param_deet, param_anno, default_value, has_default, idx)
-        params[param_name] = param
+        param_docs = all_param_docs.get(param_name, None) if all_param_docs is not None else None
+        param_note = func_annotations.get(param_name, None)
+        param_default = default_args.get(param_name, None)
+        has_default = param_name in default_args.keys()
+        params[param_name] = CommandParam(param_name, param_docs, param_note, param_default, has_default, idx)
 
     if "return" in func_annotations.keys():
         return_annotation = func_annotations["return"]
     else:
         return_annotation = None
 
-    if docstring is None:
-        return_doc = None
-    else:
-        return_doc = all_docs[-1].replace(":return:", "").strip()
-
-    return CommandMethod(name, all_docs[0], params, return_doc, func_def, return_annotation, func_impl)
+    return CommandMethod(name, method_docs, params, return_doc, func_def, return_annotation, func_impl)
 
 
 def get_default_args(func):
@@ -102,7 +155,7 @@ def get_default_args(func):
             yield key, val.default
 
 
-def print_help_info(parent_module, parent_module_name: str, command_list: Dict[str, CommandMethod]):
+def print_help_info(parent_module, parent_module_name: str, command_list: Dict[str, CommandMethod], has_version):
     if parent_module.__doc__ is None:
         print("No documentation provided.")
     else:
@@ -111,134 +164,93 @@ def print_help_info(parent_module, parent_module_name: str, command_list: Dict[s
     print("\nUsage:")
 
     for (key, val) in command_list.items():
-        print(f"  python -m {parent_module_name} {key} {val.short_params()}")
+        print(f"\tpython -m {parent_module_name} {key} {val.short_params()}")
 
-    print(f"  python -m {parent_module_name} --help")
-    print(f"  python -m {parent_module_name} --version")
+    print(f"\tpython -m {parent_module_name} --help")
+
+    if has_version:
+        print(f"\tpython -m {parent_module_name} --version")
+
     print("\nOptions:")
-    print("  --{:20}  {}".format("help", "Show this screen."))
-    print("  --{:20}  {}".format("version", "Show version information."))
+    print("\t--{:20}  {}".format("help", "Show this screen."))
+
+    if has_version:
+        print("\t--{:20}  {}".format("version", "Show version information."))
 
     for command in command_list.values():
         for param in command.params.values():
             if param.has_default:
-                print("  --{:20}  {}".format(param.name, param.details))
+                print("\t--{:20}  {}".format(param.name, param.details))
 
 
-def begin_clippy():
+def get_parent_stack_frame(index) -> inspect.FrameInfo:
     stack = inspect.stack()
 
-    if len(stack) < 1:
-        print("Unable to retrieve stack frame.")
-        sys.exit(1)
+    if len(stack) < (index + 1):
+        raise ValueError(f"Stack is too shallow to retrieve index {index}")
 
-    # get the previous stack frame (this function's caller)
-    parent_stack_frame = inspect.stack()[1]
+    # get the previous stack frame
+    parent_stack_frame = stack[index + 1]
 
     if parent_stack_frame is None:
-        print("Parent stack frame is unavailable.")
-        sys.exit(1)
+        raise ValueError("Parent stack frame is not available.")
 
-    # parse the AST of the calling file
-    tree = parse_ast(parent_stack_frame.filename)
+    return parent_stack_frame
 
-    if tree is None:
-        print("Failed to parse calling file's AST.")
-        sys.exit(1)
+
+def get_module(parent_stack_frame):
+    if len(parent_stack_frame) < 1:
+        raise ValueError("Empty parent stack frame")
 
     # retrieve (but do not import) the calling module
     parent_module = inspect.getmodule(parent_stack_frame[0])
 
-    # get the name of the parent module
-    parent_module_name = parent_module.__spec__.name
+    if parent_module is None:
+        raise ValueError("No module found in parent stack frame")
 
-    # now import the module so we can get some information that is not in the AST, like annotations
-    imported_module = importlib.import_module(parent_module_name)
+    # return the parent module and the name of the parent module
+    return parent_module, parent_module.__spec__.name
 
-    # build a list of commands
-    command_list: Dict[str, CommandMethod] = dict()
+
+def get_command_list(parent_stack_frame, imported_module):
+    tree = parse_ast(parent_stack_frame.filename)
 
     for function_definition in top_level_functions(tree.body):
-        # ignore those starting with underscores
-        if not function_definition.name.startswith("_"):
-            method = parse_function_definition(function_definition, imported_module)
+        method = parse_function_definition(function_definition, imported_module)
+        yield function_definition.name, method
 
-            if method is not None:
-                command_list[function_definition.name] = method
 
-    # if no args are given, print available commands and exit
-    if len(sys.argv) < 2:
-        print_help_info(parent_module, parent_module_name, command_list)
-        sys.exit(1)
+def read_param_pair(idx: int, params: List[str], parameter_names: List[str]) -> Tuple[str, str, int]:
+    param = params[idx]
 
-    command = sys.argv[1]
+    if param.startswith("--"):
+        if "=" in param:
+            spl = param.split("=")
+            return string_remove(spl[0], "--"), spl[1], 1
 
-    if command == "--help":
-        print_help_info(parent_module, parent_module_name, command_list)
-        sys.exit(0)
+        if idx == (len(params) - 1):
+            return string_remove(params[idx], "--"), "True", 1
 
-    if command == "--version":
-        if hasattr(imported_module, "__version__"):
-            print(f"{parent_module_name} v{imported_module.__version__}")
-            sys.exit(0)
-        else:
-            print(f"No version information found for module {parent_module_name}")
-            sys.exit(1)
+        return string_remove(params[idx], "--"), params[idx + 1], 2
 
-    if command not in command_list.keys():
-        print("Unrecognized command {}".format(command))
-        sys.exit(1)
+    if idx < len(parameter_names):
+        return parameter_names[idx], params[idx], 1
 
-    method = command_list[command]
+    raise ValueError(f"read_param_pair {idx} {params} {parameter_names}")
 
-    # get the parameters after the command name
+
+def get_all_arguments(method: CommandMethod) -> Iterator[Tuple[str, str]]:
     provided_params = sys.argv[2:]
+    parameters = list(map(lambda x: x.name, method.params.values()))
+    idx = 0
 
-    # determine positional arguments
-    positional_arguments = list()
+    while idx < len(provided_params):
+        name, val, incr = read_param_pair(idx, provided_params, parameters)
+        idx += incr
+        yield name, val
 
-    for param in provided_params:
-        if param.startswith("--"):
-            break
 
-        positional_arguments.append(param)
-
-    req_pairs = dict()
-    required = method.required_params()
-
-    for (idx, arg) in enumerate(positional_arguments):
-        if idx >= len(required):
-            print(f"Unexpected positional argument value \"{arg}\"")
-            sys.exit(1)
-
-        this_req = required[idx]
-        req_pairs[this_req.name] = arg
-
-    # get indices of optional input parameters
-    flag_indices = list()
-
-    for (idx, param) in enumerate(provided_params):
-        if param.startswith("--"):
-            flag_indices.append(idx)
-
-    # iterate parameters to determine key/value pairs
-    param_pairs = dict()
-
-    for idx in flag_indices:
-        key = provided_params[idx][2:]
-
-        if len(provided_params) >= idx + 1:
-            val = True
-        elif provided_params[idx + 1].startswith("--"):
-            val = True
-        else:
-            val = provided_params[idx + 1]
-
-        param_pairs[key] = val
-
-    # merge our required and optional parameters
-    param_pairs = {**param_pairs, **req_pairs}
-
+def cast_arguments(method, param_pairs):
     # attempt to type cast each input string
     for (key, val) in param_pairs.items():
         if key in method.params.keys():
@@ -248,33 +260,75 @@ def begin_clippy():
                 # this will attempt to type cast `val` to whatever type `annotation` is
                 param_pairs[key] = annotation(val)
 
+    return param_pairs
+
+
+def verify_required_parameters_present(method, param_pairs):
+    # verify that we have all required arguments
+    for val in method.required_params():
+        if val.name not in param_pairs.keys():
+            raise ValueError(f"Command {method.name} is missing required parameter for {val.name}")
+
+
+def begin_clippy():
+    # get the previous stack frame
+    parent_stack_frame = get_parent_stack_frame(1)
+
+    # retrieve (but do not import) the calling module
+    parent_module, parent_module_name = get_module(parent_stack_frame)
+
+    # now import the module so we can get some information that is not in the AST, like annotations
+    imported_module = importlib.import_module(parent_module_name)
+
+    # get the list of available command methods
+    command_list = dict(get_command_list(parent_stack_frame, imported_module))
+
+    # determine if imported module has version information
+    has_version = hasattr(imported_module, "__version__")
+
+    # if no args are given, print available commands and exit (with an error code)
+    if len(sys.argv) < 2:
+        print_help_info(parent_module, parent_module_name, command_list, has_version)
+        sys.exit(1)
+
+    # read the command, which is just the first argument
+    command = sys.argv[1]
+
+    # if the user requested help intentionally, print available commands and exit (with a success code)
+    if command == "--help":
+        print_help_info(parent_module, parent_module_name, command_list, has_version)
+        sys.exit(0)
+
+    # the version command is only valid if the module has a __version__ attribute
+    if command == "--version":
+        if has_version:
+            print(f"{parent_module_name} v{imported_module.__version__}")
+            sys.exit(0)
+        else:
+            print(f"Module {parent_module_name} has no version information")
+            sys.exit(1)
+
+    # handle unrecognized commands; future versions could try to auto-correct, but that seems fraught with peril
+    if command not in command_list.keys():
+        print("Unrecognized command {}".format(command))
+        sys.exit(1)
+
+    # get the specified command from the list of commands
+    target_command = command_list[command]
+
+    # read the provided arguments to the command
+    arguments = dict(get_all_arguments(target_command))
+
+    # type cast provided arguments where possible
+    param_pairs = cast_arguments(target_command, arguments)
+
     # print help info if requested
     if "help" in param_pairs:
-        print(method.details)
-        print("\nUsage:")
-        print(f"  python -m {parent_module_name} {method.name} {method.short_params()}")
-
-        if len(method.params) > 0:
-            print("\nPositional arguments:")
-
-            for param in method.params.values():
-                if not param.has_default:
-                    print("  {:20}  {}".format(param.name, param.details))
-
-        print("\nOptions:")
-        print("  --{:20}  {}".format("help", "Show this screen."))
-
-        for param in method.params.values():
-            if param.has_default:
-                print("  --{:20}  {}".format(param.name, param.details))
-
+        target_command.print_help(parent_module_name)
         sys.exit(0)
 
     # verify that we have all required arguments
-    for val in required:
-        if val.name not in param_pairs.keys():
-            print(f"Command {method.name} is missing required parameter for {val.name}")
-            sys.exit(1)
+    verify_required_parameters_present(target_command, param_pairs)
 
     # finally, invoke the desired command with all given arguments
-    print(method.call(param_pairs))
+    print(target_command.call(param_pairs))
