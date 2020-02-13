@@ -65,6 +65,7 @@ class CommandParam:
             raise TypeError("Parameter index must be an integer.")
 
         self._name = name
+        self._index = index
         self._documentation = documentation if documentation else "No documentation provided."
         self._annotation = annotation
 
@@ -72,7 +73,8 @@ class CommandParam:
             self._default_value = None
             self._has_default = False
         else:
+            if not isinstance(default_args, dict):
+                raise TypeError(f"Parameter default_args must be a dict, if provided. Received {type(default_args)}")
+
             self._default_value = default_args.get(name, None)
             self._has_default = name in default_args.keys()
-
-        self._index = index

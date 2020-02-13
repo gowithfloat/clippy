@@ -6,7 +6,7 @@ import unittest
 from clippy.command_return import CommandReturn
 
 
-class TestClippy(unittest.TestCase):
+class TestCommandReturn(unittest.TestCase):
     def test_create_empty(self):
         command_return = CommandReturn()
         self.assertIsNotNone(command_return)

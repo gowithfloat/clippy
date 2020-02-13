@@ -7,7 +7,7 @@ from clippy import clippy, begin_clippy
 from clippy.common import is_clippy_command
 
 
-class TestClippy(unittest.TestCase):
+class TestClip(unittest.TestCase):
     def test_clippy_attribute(self):
         @clippy
         def clippy_function():
