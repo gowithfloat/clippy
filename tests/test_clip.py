@@ -3,16 +3,20 @@
 
 import unittest
 
-from clippy.command_return import CommandReturn
+from clippy import clippy, begin_clippy
+from clippy.common import is_clippy_command
 
 
 class TestClippy(unittest.TestCase):
-    def test_sanity(self):
-        self.assertTrue(True)
+    def test_clippy_attribute(self):
+        @clippy
+        def clippy_function():
+            return True
 
-    def test_create_command_return(self):
-        method = CommandReturn("details", None)
-        self.assertEqual("details", method.details)
+        self.assertTrue(is_clippy_command(clippy_function))
+
+    def test_begin_clippy(self):
+        self.assertRaises(SystemExit, begin_clippy)
 
 
 if __name__ == "__main__":

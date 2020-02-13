@@ -7,5 +7,7 @@ Clippy (Command Line Interface Parser for Python) crawls the abstract syntax tre
 Any function annotated with `@clippy` will have it's name, parameters, type annotation, and documentation parsed to generate commands.
 """
 
-from .clip import clippy
-from .clip import begin_clippy
+# flake8: noqa
+
+from .clip import clippy  # pylint: disable=unused-import
+from .clip import begin_clippy  # pylint: disable=unused-import

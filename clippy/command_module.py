@@ -99,11 +99,17 @@ def _top_level_functions(body: List[stmt]) -> Iterable[FunctionDef]:
             yield func
 
 
-def _get_command_list(parent_stack_frame: FrameInfo, imported_module: ModuleType) -> Dict[str, CommandMethod]:
-    tree = _parse_ast(parent_stack_frame.filename)
+def _get_command_list(stack_frame: FrameInfo, imported_module: ModuleType) -> Dict[str, CommandMethod]:
+    """
+    Gets a list of functions as CommandMethods keyed by their function name from a stack frame and module.
+
+    :param stack_frame: The frame from which to load the functions.
+    :param imported_module: A module containing functions to load.
+    :returns: A dictionary of methods keyed by their name.
+    """
     result = dict()
 
-    for function_definition in _top_level_functions(tree.body):
+    for function_definition in _top_level_functions(_parse_ast(stack_frame.filename).body):
         func_impl = getattr(imported_module, function_definition.name)
 
         if is_clippy_command(func_impl) and function_definition is not None:
@@ -121,7 +127,7 @@ class CommandModule:
         return getattr(self._impl.__spec__, "name")
 
     @property
-    def details(self) -> str:
+    def documentation(self) -> str:
         """Returns the documentation associated with this module, or a default value."""
         return self._impl.__doc__.strip() if self._impl.__doc__ else "No documentation provided."
 
@@ -161,7 +167,7 @@ class CommandModule:
         """
         Print a help message for this module.
         """
-        print(self.details)
+        print(self.documentation)
         print("\nUsage:")
 
         for (key, val) in self.commands.items():
@@ -181,4 +187,4 @@ class CommandModule:
         for command in self.commands.values():
             for param in command.params.values():
                 if param.has_default:
-                    print("\t--{:20}  {}".format(param.name, param.details))
+                    print("\t--{:20}  {}".format(param.name, param.documentation))

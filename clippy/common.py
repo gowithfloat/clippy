@@ -32,4 +32,26 @@ def is_clippy_command(func: Callable) -> bool:
     :param func: The function to check for Clippy command support.
     :returns: True if the given function is a Clippy command, false otherwise.
     """
+    if not callable(func):
+        raise TypeError(f"Parameter func must be callable. Received {type(func)}")
+
     return hasattr(func, "is_clippy_command")
+
+
+def right_pad(string: str, count: int) -> str:
+    """
+    Add spaces to the end of a string.
+
+    :param string: The string to pad.
+    :param count: The number of characters to which the given string should be padded.
+    """
+    if not string:
+        raise ValueError(f"Parameter string is required.")
+
+    if not isinstance(string, str):
+        raise TypeError(f"Parameter string must be a string. Received {type(string)}")
+
+    if count < 0:
+        raise ValueError(f"Parameter count must be positive. Received {count}")
+
+    return string + " " * (len(string) - count)

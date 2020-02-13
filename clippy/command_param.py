@@ -23,9 +23,9 @@ class CommandParam:
         return self._index
 
     @property
-    def details(self) -> str:
+    def documentation(self) -> str:
         """Returns the documentation associated with the parameter, or a default value."""
-        return self._details
+        return self._documentation
 
     @property
     def annotation(self) -> Optional[type]:
@@ -37,10 +37,10 @@ class CommandParam:
         """Returns true if this parameter has a default value, false otherwise."""
         return self._has_default
 
-    def __init__(self,
+    def __init__(self,  # pylint: disable=too-many-arguments
                  name: str,
                  index: int,
-                 details: Optional[str] = None,
+                 documentation: Optional[str] = None,
                  annotation: Optional[type] = None,
                  default_args: Optional[Dict[str, Any]] = None):
         """
@@ -48,7 +48,7 @@ class CommandParam:
 
         :param name: The name of the parameter. Required.
         :param index: The position of the parameter in the list of function parameters. Required.
-        :param details: The documentation of the parameter. Optional. Defaults to none.
+        :param documentation: The documentation of the parameter. Optional. Defaults to none.
         :param annotation: The type annotation of the parameter. Optional. Defaults to none.
         :param default_args: The default arguments in this parameter's function. Optional. Defaults to none.
         """
@@ -65,7 +65,7 @@ class CommandParam:
             raise TypeError("Parameter index must be an integer.")
 
         self._name = name
-        self._details = details if details else "No documentation provided."
+        self._documentation = documentation if documentation else "No documentation provided."
         self._annotation = annotation
 
         if default_args is None:

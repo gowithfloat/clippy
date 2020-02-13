@@ -4,6 +4,7 @@
 """
 Defines a function within a module, including its name, documentation, and parameters, if provided.
 """
+
 import ast
 import inspect
 from ast import FunctionDef
@@ -12,17 +13,7 @@ from typing import Dict, List, Optional, Callable, Tuple, Any, Sized
 
 from .command_param import CommandParam
 from .command_return import CommandReturn
-from .common import string_remove
-
-
-def _right_pad(string: str, count: int) -> str:
-    """
-    Add spaces to the end of a string.
-
-    :param string: The string to pad.
-    :param count: The number of spaces to add.
-    """
-    return string + " " * (len(string) - count)
+from .common import string_remove, right_pad
 
 
 def _is_empty(iterable) -> bool:
@@ -233,7 +224,7 @@ class CommandMethod:
             param_name = arg.arg
             params[param_name] = CommandParam(name=param_name,
                                               index=idx,
-                                              details=all_param_docs.get(param_name, None) if all_param_docs is not None else None,
+                                              documentation=all_param_docs.get(param_name, None) if all_param_docs is not None else None,
                                               annotation=func_annotations.get(param_name, None),
                                               default_args=default_args)
 
@@ -242,7 +233,7 @@ class CommandMethod:
         self._impl = func_impl
         self._params = params
         self._main = method_docs
-        self._return = CommandReturn(details=return_doc,
+        self._return = CommandReturn(documentation=return_doc,
                                      annotation=func_annotations.get("return", None))
 
     def parse_arguments(self, arguments: List[str]) -> Dict[str, Any]:
@@ -295,13 +286,13 @@ class CommandMethod:
             print("\nPositional arguments:")
 
             for param in self.required_params:
-                print("\t{}\t{}".format(_right_pad(param.name, longest), param.details))
+                print("\t{}\t{}".format(right_pad(param.name, longest), param.documentation))
 
         print("\nOptions:")
         print("\t--{}\t{}".format("help", "Show this screen."))
 
         for param in self.optional_params:
-            print("\t--{}\t{}".format(_right_pad(param.name, longest), param.details))
+            print("\t--{}\t{}".format(right_pad(param.name, longest), param.documentation))
 
     def call(self, args: Dict):
         """
