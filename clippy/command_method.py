@@ -1,64 +1,202 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
+"""
+Defines a function within a module, including its name, documentation, and parameters, if provided.
+"""
+import ast
+import inspect
 from ast import FunctionDef
-from typing import Dict, List, Optional
+from types import ModuleType
+from typing import Dict, List, Optional, Callable, Tuple, Any, Sized
 
 from .command_param import CommandParam
 from .command_return import CommandReturn
+from .common import string_remove
 
 
-def _right_pad(string, count):
+def _right_pad(string: str, count: int) -> str:
+    """
+    Add spaces to the end of a string.
+
+    :param string: The string to pad.
+    :param count: The number of spaces to add.
+    """
     return string + " " * (len(string) - count)
 
 
-class CommandMethod(object):
+def _is_empty(iterable) -> bool:
+    """
+    Returns true if the given iterable is empty, false otherwise.
+
+    :param iterable: The parameter to check for iterability.
+    :returns: True if the iterable is empty.
+    """
+    if isinstance(iterable, Sized):
+        return len(iterable) < 1
+
+    return not iterable
+
+
+def _list_first(lst: List[Any]) -> Any:
+    """
+    Get the first item from a list or iterable object.
+
+    :param lst: The list or iterable object from which to get the first value.
+    :returns: The first value, or none.
+    """
+    if _is_empty(lst):
+        return None
+
+    if isinstance(lst, list):
+        return lst[0]
+
+    return next(lst, None)
+
+
+def _list_last(lst: List[Any]) -> Any:
+    """
+    Get the last item from a list or iterable object.
+
+    :param lst: The list or iterable object from which to get the last value.
+    :returns: The last value, or none.
+    """
+    if _is_empty(lst):
+        return None
+
+    if isinstance(lst, list):
+        return lst[-1]
+
+    item = None
+
+    for item in lst:
+        pass
+
+    return item
+
+
+def _read_param_pair(idx: int, params: List[str], parameter_names: List[str]) -> Tuple[str, str, int]:
+    """
+    Given a parameter index, list of parameters, and parameter names, generate a tuple of parameter name, value, and increment to the next parameter.
+
+    :param idx: The index of the parameter.
+    :param params: The list of parameters.
+    :param parameter_names: The list of parameter names.
+    :returns: A tuple of name, value, and increments.
+    """
+    param = params[idx]
+
+    if param.startswith("--"):
+        if "=" in param:
+            spl = param.split("=")
+            return string_remove(spl[0], "--"), spl[1], 1
+
+        if idx == (len(params) - 1):
+            return string_remove(params[idx], "--"), "True", 1
+
+        return string_remove(params[idx], "--"), params[idx + 1], 2
+
+    if idx < len(parameter_names):
+        return parameter_names[idx], params[idx], 1
+
+    raise ValueError(f"read_param_pair {idx} {params} {parameter_names}")
+
+
+def _function_docs_from_string(docstring: str) -> Tuple[Optional[str], Optional[Dict[str, str]], Optional[str]]:
+    """
+    Parse the given docstring into a tuple of method documentation, parameter documentation, and return type documentation.
+
+    :param docstring: The docstring to parse into individual components.
+    :returns: A tuple of documentation types.
+    """
+    if docstring is None or len(docstring) < 1:
+        return None, None, None
+
+    all_docs = docstring.split("\n")
+
+    if _is_empty(all_docs):
+        return None, None, None
+
+    all_docs = list(map(lambda x: x.strip(), filter(lambda x: x != "", all_docs)))
+
+    if _is_empty(all_docs):
+        return None, None, None
+
+    has_return = not _is_empty(filter(lambda x: ":return:" in x, all_docs))
+    param_docs = dict()
+    param_list = list(all_docs)[1:-1] if has_return else list(all_docs)[1:]
+
+    for doc in param_list:
+        split = list(filter(lambda x: x != "", map(lambda x: x.strip(), doc.split(":"))))
+        param_docs[_list_first(split).replace("param ", "")] = split[1]
+
+    return_doc = None
+
+    if has_return:
+        return_doc = string_remove(_list_last(all_docs), ":return:").strip()
+
+    return _list_first(all_docs), param_docs, return_doc
+
+
+def _get_default_args(func: Callable) -> Dict[str, Any]:
+    """
+    Return all default arguments for the given function.
+
+    :param func: The function for which to retrieve default arguments.
+    :returns: A dictionary of default arguments.
+    """
+    result = dict()
+
+    for (key, val) in inspect.signature(func).parameters.items():
+        if val.default is not inspect.Parameter.empty:
+            result[key] = val.default
+
+    return result
+
+
+class CommandMethod:
+    """A function within a module and its associated properties."""
+
     @property
     def name(self) -> str:
+        """Returns the name of this function."""
         return self._name
 
     @property
     def details(self) -> str:
-        return self._main
+        """Returns the documentation associated with this function, or a default value."""
+        return self._main if self._main else "No documentation provided."
 
     @property
     def params(self) -> Dict[str, CommandParam]:
+        """Returns the parameters (keyed by the parameter name) associated with this function."""
         return self._params
 
-    def __init__(self, name: str, main_doc: Optional[str], param_doc: Dict[str, CommandParam], return_doc: str, defn: FunctionDef, return_anno, impl):
-        self._name = name
-
-        if main_doc is None:
-            self._main = "No documentation provided."
-        else:
-            self._main = main_doc
-
-        self._params = param_doc
-        self._return = CommandReturn(return_doc, return_anno)
-        self._def = defn
-        self._impl = impl
-
+    @property
     def required_params(self) -> List[CommandParam]:
-        result = list(filter(lambda x: not x.has_default, self._params.values()))
+        """Convenience accessor to get only parameters without a default value, sorted by index."""
+        result = list(filter(lambda x: not x.has_default, self.params.values()))
         result.sort(key=lambda x: x.index)
         return result
 
+    @property
     def optional_params(self) -> List[CommandParam]:
+        """Convenience accessor to get only parameters with a default value, sorted by index."""
         result = list(filter(lambda x: x.has_default, self._params.values()))
         result.sort(key=lambda x: x.index)
         return result
 
+    @property
     def longest_param_name_length(self) -> int:
+        """Returns the length of the longest parameter name, or zero if this function has no parameters."""
         if len(self.params) < 1:
             return 0
 
         return len(max(self.params.keys(), key=len))
 
-    def call(self, args: Dict):
-        return self._impl(**args)
-
+    @property
     def short_params(self) -> str:
+        """Returns a string describing the parameters associated with this method in a shortened format."""
         result = ""
 
         for param in self.params.values():
@@ -74,20 +212,101 @@ class CommandMethod(object):
 
         return result
 
-    def print_help(self, module_name):
+    def __init__(self, function_definition: FunctionDef, module: ModuleType):
+        """
+        Creates a new object to hold function information.
+
+        :param function_definition: A function from the AST. Required.
+        :param module: An imported module.
+        """
+        func_impl = getattr(module, function_definition.name)
+
+        method_docs, all_param_docs, return_doc = _function_docs_from_string(ast.get_docstring(function_definition))
+
+        func_annotations = func_impl.__annotations__
+        default_args = _get_default_args(func_impl)
+
+        params = dict()
+        func_args = function_definition.args.args
+
+        for (idx, arg) in enumerate(func_args):
+            param_name = arg.arg
+            params[param_name] = CommandParam(name=param_name,
+                                              index=idx,
+                                              details=all_param_docs.get(param_name, None) if all_param_docs is not None else None,
+                                              annotation=func_annotations.get(param_name, None),
+                                              default_args=default_args)
+
+        self._name = function_definition.name
+        self._def = function_definition
+        self._impl = func_impl
+        self._params = params
+        self._main = method_docs
+        self._return = CommandReturn(details=return_doc,
+                                     annotation=func_annotations.get("return", None))
+
+    def parse_arguments(self, arguments: List[str]) -> Dict[str, Any]:
+        """
+        Parse the given list of arguments to generate pairs of argument names and values for this method.
+
+        :param arguments: Command-line arguments provided to a method.
+        :return: Argument names paired with their typed (if type annotations are available) value.
+        """
+        parameters = list(map(lambda x: x.name, self.params.values()))
+        idx = 0
+        result = dict()
+
+        while idx < len(arguments):
+            name, val, incr = _read_param_pair(idx, arguments, parameters)
+            idx += incr
+            result[name] = val
+
+        for (key, val) in result.items():
+            if key in self.params.keys():
+                annotation = self.params[key].annotation
+
+                if annotation is not None:
+                    result[key] = annotation(val)
+
+        return result
+
+    def validate_arguments(self, arguments: Dict[str, Any]) -> None:
+        """
+        Verifies that the result of `parse_arguments` has all required values. Raises a ValueError for missing values.
+
+        :param arguments: The arguments to validate.
+        """
+        for val in self.required_params:
+            if val.name not in arguments.keys():
+                raise ValueError(f"Command {self.name} is missing required parameter for {val.name}")
+
+    def print_help(self, module_name) -> None:
+        """
+        Print a help message for this method.
+
+        :param module_name: The name of the module in which this method appears.
+        """
         print(self.details)
         print("\nUsage:")
-        print(f"\tpython -m {module_name} {self.name} {self.short_params()}")
-        longest = self.longest_param_name_length()
+        print(f"\tpython -m {module_name} {self.name} {self.short_params}")
+        longest = self.longest_param_name_length
 
         if len(self.params) > 0:
             print("\nPositional arguments:")
 
-            for param in self.required_params():
+            for param in self.required_params:
                 print("\t{}\t{}".format(_right_pad(param.name, longest), param.details))
 
         print("\nOptions:")
         print("\t--{}\t{}".format("help", "Show this screen."))
 
-        for param in self.optional_params():
+        for param in self.optional_params:
             print("\t--{}\t{}".format(_right_pad(param.name, longest), param.details))
+
+    def call(self, args: Dict):
+        """
+        Invoke the implementation of the function to which this object is referring.
+
+        :param args: The arguments to pass to the underlying function.
+        """
+        return self._impl(**args)
