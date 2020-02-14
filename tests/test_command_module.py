@@ -8,7 +8,9 @@ Tests for command_module.py
 import unittest
 
 from clippy import clippy
-from clippy.command_module import CommandModule, _parse_ast
+
+# noinspection PyProtectedMember
+from clippy.command_module import CommandModule, _parse_ast, _get_parent_stack_frame
 
 __version__ = "0.0.1"
 
@@ -76,9 +78,47 @@ class TestCommandModule(unittest.TestCase):
 
     def test_parse_ast_folder(self):
         def invalid():
-            _ = _parse_ast("../tests")
+            _ = _parse_ast("tests")
 
         self.assertRaises(ValueError, invalid)
+
+    def test_parse_empty_file(self):
+        def invalid():
+            _ = _parse_ast("tests/empty_file.py")
+
+        self.assertRaises(ValueError, invalid)
+
+    def test_get_parent_stack_frame(self):
+        stack_frame = _get_parent_stack_frame(1)
+        self.assertIsNotNone(stack_frame)
+
+    def test_get_parent_stack_frame_invalid_type(self):
+        def invalid():
+            # noinspection PyTypeChecker
+            _ = _get_parent_stack_frame("1")
+
+        self.assertRaises(TypeError, invalid)
+
+    def test_get_parent_stack_frame_invalid_index(self):
+        def invalid():
+            # noinspection PyTypeChecker
+            _ = _get_parent_stack_frame(64)
+
+        self.assertRaises(ValueError, invalid)
+
+    def test_empty_parent_stack_frame(self):
+        def invalid():
+            # noinspection PyTypeChecker
+            _ = _get_parent_stack_frame(1, [])
+
+        self.assertRaises(ValueError, invalid)
+
+    def test_invalid_parent_stack_frame(self):
+        def invalid():
+            # noinspection PyTypeChecker
+            out = _get_parent_stack_frame(1, [None])
+
+        self.assertRaises(TypeError, invalid)
 
 
 if __name__ == "__main__":

@@ -9,61 +9,11 @@ import ast
 from ast import FunctionDef
 import inspect
 from types import ModuleType
-from typing import Any, Callable, Dict, List, Optional, Sized, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .command_param import CommandParam
 from .command_return import CommandReturn
 from .common import right_pad, string_remove
-
-
-def _is_empty(iterable) -> bool:
-    """
-    Returns true if the given iterable is empty, false otherwise.
-
-    :param iterable: The parameter to check for iterability.
-    :returns: True if the iterable is empty.
-    """
-    if isinstance(iterable, Sized):
-        return len(iterable) < 1
-
-    return not iterable
-
-
-def _list_first(lst: List[Any]) -> Any:
-    """
-    Get the first item from a list or iterable object.
-
-    :param lst: The list or iterable object from which to get the first value.
-    :returns: The first value, or none.
-    """
-    if _is_empty(lst):
-        return None
-
-    if isinstance(lst, list):
-        return lst[0]
-
-    return next(lst, None)
-
-
-def _list_last(lst: List[Any]) -> Any:
-    """
-    Get the last item from a list or iterable object.
-
-    :param lst: The list or iterable object from which to get the last value.
-    :returns: The last value, or none.
-    """
-    if _is_empty(lst):
-        return None
-
-    if isinstance(lst, list):
-        return lst[-1]
-
-    item = None
-
-    for item in lst:
-        pass
-
-    return item
 
 
 def _read_param_pair(idx: int, params: List[str], parameter_names: List[str]) -> Tuple[str, str, int]:
@@ -90,7 +40,7 @@ def _read_param_pair(idx: int, params: List[str], parameter_names: List[str]) ->
     if idx < len(parameter_names):
         return parameter_names[idx], params[idx], 1
 
-    raise ValueError(f"read_param_pair {idx} {params} {parameter_names}")
+    raise ValueError(f"Unexpected argument at index {idx} in {params} with names {parameter_names}")
 
 
 def _function_docs_from_string(docstring: str) -> Tuple[Optional[str], Optional[Dict[str, str]], Optional[str]]:
@@ -100,33 +50,28 @@ def _function_docs_from_string(docstring: str) -> Tuple[Optional[str], Optional[
     :param docstring: The docstring to parse into individual components.
     :returns: A tuple of documentation types.
     """
-    if docstring is None or len(docstring) < 1:
+    if not docstring:
         return None, None, None
 
-    all_docs = docstring.split("\n")
+    all_docs = list(map(lambda x: x.strip(), filter(lambda x: x != "", docstring.split("\n"))))
 
-    if _is_empty(all_docs):
+    if not all_docs:
         return None, None, None
 
-    all_docs = list(map(lambda x: x.strip(), filter(lambda x: x != "", all_docs)))
-
-    if _is_empty(all_docs):
-        return None, None, None
-
-    has_return = not _is_empty(filter(lambda x: ":return:" in x, all_docs))
+    has_return = filter(lambda x: ":return:" in x, all_docs)
     param_docs = dict()
     param_list = list(all_docs)[1:-1] if has_return else list(all_docs)[1:]
 
     for doc in param_list:
         split = list(filter(lambda x: x != "", map(lambda x: x.strip(), doc.split(":"))))
-        param_docs[_list_first(split).replace("param ", "")] = split[1]
+        param_docs[split[0].replace("param ", "")] = split[1]
 
     return_doc = None
 
     if has_return:
-        return_doc = string_remove(_list_last(all_docs), ":return:").strip()
+        return_doc = string_remove(all_docs[-1], ":return:").strip()
 
-    return _list_first(all_docs), param_docs, return_doc
+    return all_docs[0], param_docs, return_doc
 
 
 def _get_default_args(func: Callable) -> Dict[str, Any]:

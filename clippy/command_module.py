@@ -12,34 +12,37 @@ import os
 import inspect
 from inspect import FrameInfo
 from types import ModuleType
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional
 
 from .command_method import CommandMethod
 from .common import is_clippy_command, right_pad
 
 
-def _get_parent_stack_frame(index: int) -> FrameInfo:
+def _get_parent_stack_frame(index: int, stack: Optional[List[FrameInfo]] = None) -> FrameInfo:
     """
     Get the stack frame that is `index` up from the current frame.
 
     :param index: The index of the frame to retrieve.
+    :param stack: Optionally provide a stack from which to get a frame.
     :returns: The desired stack frame.
     """
     if not isinstance(index, int):
         raise TypeError(f"Parameter index must be an int, received {type(index)}.")
 
-    stack = inspect.stack()
+    if stack is None:
+        stack = inspect.stack()
+    else:
+        if not isinstance(stack, list):
+            raise TypeError(f"Parameter stack must be a list if provided, received {type(stack)}")
+
+        if not all(isinstance(el, FrameInfo) for el in stack):
+            raise TypeError(f"Parameter stack must be a list of FrameInfo if provided")
 
     if len(stack) < (index + 1):
         raise ValueError(f"Stack is too shallow to retrieve index {index}")
 
     # get the previous stack frame
-    parent_stack_frame = stack[index + 1]
-
-    if parent_stack_frame is None:
-        raise ValueError("Parent stack frame is not available.")
-
-    return parent_stack_frame
+    return stack[index + 1]
 
 
 def _get_module_impl(stack_frame: FrameInfo) -> ModuleType:
@@ -81,7 +84,7 @@ def _parse_ast(filename: str) -> Module:
     with open(filename, "rt") as file:
         result = ast.parse(file.read(), filename=filename)
 
-    if result is None:
+    if not result or not result.body:
         raise ValueError(f"Unable to parse file {filename}")
 
     return result
