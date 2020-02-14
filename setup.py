@@ -16,7 +16,7 @@ with open(os.path.join(this_folder, "readme.md"), encoding="utf-8") as f:
 
 setuptools.setup(
     name="Clippy",
-    version="0.2.0",
+    version="0.4.0",
     author="Steve Richey",
     author_email="srichey@gowithfloat.com",
     description="Clippy generates command-line interfaces for Python modules.",
