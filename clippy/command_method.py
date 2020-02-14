@@ -289,7 +289,7 @@ class CommandMethod:
                 print("\t{}\t{}".format(right_pad(param.name, longest), param.documentation))
 
         print("\nOptions:")
-        print("\t--{}\t{}".format("help", "Show this screen."))
+        print("\t--{}\t{}".format(right_pad("help", longest), "Show this screen."))
 
         for param in self.optional_params:
             print("\t--{}\t{}".format(right_pad(param.name, longest), param.documentation))
