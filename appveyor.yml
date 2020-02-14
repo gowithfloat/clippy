@@ -1,7 +1,5 @@
 environment:
   matrix:
-  - TOXENV: py38
-  - TOXENV: py37
   - TOXENV: py36
 
 build: false
@@ -10,7 +8,8 @@ install:
 - SET PATH=%PYTHON%;%path%
 - echo $PYTHON%
 - echo %path%
-- "python --version"
+- python --version
+- python3 --version
 - pip install -r requirements.txt
 - pip install tox
 
