@@ -150,10 +150,10 @@ class CommandModule:
     def longest_param_name_length(self) -> int:
         """Returns the length of the longest parameter name, or zero if this function has no parameters."""
         if not self.commands:
-            return 0
+            return len("--version") if self.has_version else len("--help")
 
         param_lengths = list(map(lambda x: x.longest_param_name_length, self.commands.values()))
-        return max(param_lengths + [len("--version"), len("--help")])
+        return max(param_lengths + [len("--version") if self.has_version else len("--help")])
 
     def __init__(self, index: int = 1):
         """

@@ -83,11 +83,23 @@ class TestCommandParam(unittest.TestCase):
         def create_invalid():
             # noinspection PyTypeChecker
             _ = CommandParam(name="test",
-                             index=3,
+                             index=10,
                              default_args="test")
 
         self.assertRaises(TypeError, create_invalid)
 
+    def test_annotation_name(self):
+        command_param = CommandParam(name="param",
+                                     index=11,
+                                     annotation=str)
+        self.assertEqual(str, command_param.annotation)
+        self.assertEqual("str", command_param.annotation_name)
+
+    def test_no_annotation_name(self):
+        command_param = CommandParam(name="param",
+                                     index=12)
+        self.assertEqual(None, command_param.annotation)
+        self.assertEqual(None, command_param.annotation_name)
 
 
 if __name__ == "__main__":
