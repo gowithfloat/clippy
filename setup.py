@@ -30,7 +30,7 @@ setuptools.setup(
     version=__version__,
     author="Steve Richey",
     author_email="srichey@gowithfloat.com",
-    description=__doc__,
+    description="Clippy generates command-line interfaces for Python modules.",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/gowithfloat/clippy",
