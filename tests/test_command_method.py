@@ -15,31 +15,103 @@ from clippy.command_method import CommandMethod
 
 
 def test_method(arg1, arg2=None):
-    print(f"test_method: {arg1} {arg2}")
+    return f"test_method: {arg1} {arg2}"
+
+
+def get_definition(name):
+    stack_frame = inspect.stack()[0]
+    module = importlib.import_module(inspect.getmodule(stack_frame[0]).__spec__.name)
+
+    with open(__file__, "rt") as file:
+        parsed = ast.parse(file.read(), filename=__file__)
+
+    definition = None
+
+    for func in parsed.body:
+        if isinstance(func, FunctionDef) and func.name == name:
+            definition = func
+            break
+
+    return definition, module
 
 
 class TestCommandMethod(unittest.TestCase):
     def test_create(self):
-        stack_frame = inspect.stack()[0]
-        module = inspect.getmodule(stack_frame[0])
-        imported_module = importlib.import_module(module.__spec__.name)
-
-        with open(__file__, "rt") as file:
-            parsed = ast.parse(file.read(), filename=__file__)
-
-        definition = None
-
-        for func in parsed.body:
-            if isinstance(func, FunctionDef):
-                definition = func
-                break
+        definition, module = get_definition("test_method")
 
         if definition is None:
             self.fail("unable to load definition")
 
+        if module is None:
+            self.fail("unable to load module")
+
         command_method = CommandMethod(function_definition=definition,
-                                       module=imported_module)
+                                       module=module)
         self.assertIsNotNone(command_method)
+
+    def test_name(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual("test_method", command_method.name)
+
+    def test_documentation(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual("No documentation provided.", command_method.documentation)
+
+    def test_required_params(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual(1, len(command_method.required_params))
+
+    def test_optional_params(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual(1, len(command_method.optional_params))
+
+    def test_longest_param(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual(4, command_method.longest_param_name_length)
+
+    def test_short_params(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual("<arg1> [--arg2=<ar>] ", command_method.short_params)
+
+    def test_parse_args(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual({"arg1": "test"}, command_method.parse_arguments(["test"]))
+
+    def test_validate_args(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertIsNone(command_method.validate_arguments({"arg1": "test"}))
+
+    def test_validate_bad_args(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+
+        def invalid():
+            command_method.validate_arguments({"arg2": "test"})
+
+        self.assertRaises(ValueError, invalid)
+
+    def test_call(self):
+        definition, module = get_definition("test_method")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual("test_method: test None", command_method.call({"arg1": "test"}))
 
 
 if __name__ == "__main__":
