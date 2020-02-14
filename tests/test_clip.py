@@ -40,6 +40,12 @@ class TestClip(unittest.TestCase):
 
         self.assertRaises(SystemExit, valid)
 
+    def test_begin_module_help(self):
+        def valid():
+            begin_clippy(["some_module", "--help"])
+
+        self.assertRaises(SystemExit, valid)
+
     def test_begin_version(self):
         def valid():
             begin_clippy(["some_module", "--version"])
