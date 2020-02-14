@@ -54,4 +54,4 @@ def right_pad(string: str, count: int) -> str:
     if count < 0:
         raise ValueError(f"Parameter count must be positive. Received {count}")
 
-    return string + " " * (len(string) - count)
+    return string + " " * (count - len(string))
