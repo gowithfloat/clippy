@@ -48,7 +48,7 @@ class TestClip(unittest.TestCase):
 
     def test_begin_function(self):
         def valid():
-            begin_clippy(["top_level_function", "--help"])
+            begin_clippy(["some_module", "top_level_function", "--help"])
 
         self.assertRaises(SystemExit, valid)
 

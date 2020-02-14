@@ -117,7 +117,14 @@ class TestCommandModule(unittest.TestCase):
     def test_invalid_parent_stack_frame(self):
         def invalid():
             # noinspection PyTypeChecker
-            out = _get_parent_stack_frame(1, [None])
+            _ = _get_parent_stack_frame(1, [None])
+
+        self.assertRaises(TypeError, invalid)
+
+    def test_invalid_parent_stack_frame_not_list(self):
+        def invalid():
+            # noinspection PyTypeChecker
+            _ = _get_parent_stack_frame(1, dict())
 
         self.assertRaises(TypeError, invalid)
 
@@ -130,6 +137,12 @@ class TestCommandModule(unittest.TestCase):
     def test_get_module_impl_empty(self):
         def invalid():
             _ = _get_module_impl(FrameInfo(frame="test", filename="test", lineno=0, function="test", code_context="test", index=0))
+
+        self.assertRaises(ValueError, invalid)
+
+    def test_get_module_impl_none(self):
+        def invalid():
+            _ = _get_module_impl(None)
 
         self.assertRaises(ValueError, invalid)
 
