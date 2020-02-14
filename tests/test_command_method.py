@@ -18,6 +18,19 @@ def test_method(arg1, arg2=None):
     return f"test_method: {arg1} {arg2}"
 
 
+def test_no_params():
+    return f"test_no_params"
+
+
+def test_function_docs(arg):
+    """
+    A function to test docs.
+    :param arg: An argument.
+    :return: A return value.
+    """
+    return f"test_function_docs: {arg}"
+
+
 def get_definition(name):
     stack_frame = inspect.stack()[0]
     module = importlib.import_module(inspect.getmodule(stack_frame[0]).__spec__.name)
@@ -112,6 +125,26 @@ class TestCommandMethod(unittest.TestCase):
         command_method = CommandMethod(function_definition=definition,
                                        module=module)
         self.assertEqual("test_method: test None", command_method.call({"arg1": "test"}))
+
+    def test_no_params(self):
+        definition, module = get_definition("test_no_params")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual(0, command_method.longest_param_name_length)
+
+    def test_function_documentation(self):
+        definition, module = get_definition("test_function_docs")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertEqual("A function to test docs.", command_method.documentation)
+        self.assertEqual("An argument.", command_method.params["arg"].documentation)
+        self.assertEqual("A return value.", command_method.return_value.documentation)
+
+    def test_print_help(self):
+        definition, module = get_definition("test_function_docs")
+        command_method = CommandMethod(function_definition=definition,
+                                       module=module)
+        self.assertIsNone(command_method.print_help("test"))
 
 
 if __name__ == "__main__":

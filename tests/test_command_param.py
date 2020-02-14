@@ -79,6 +79,16 @@ class TestCommandParam(unittest.TestCase):
 
         self.assertRaises(TypeError, create_invalid)
 
+    def test_create_invalid_defaults(self):
+        def create_invalid():
+            # noinspection PyTypeChecker
+            _ = CommandParam(name="test",
+                             index=3,
+                             default_args="test")
+
+        self.assertRaises(TypeError, create_invalid)
+
+
 
 if __name__ == "__main__":
     unittest.main()

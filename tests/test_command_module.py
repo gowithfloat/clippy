@@ -7,10 +7,16 @@ Tests for command_module.py
 
 import unittest
 
+from clippy import clippy
 from clippy.command_module import CommandModule
 
 
 __version__ = "0.0.1"
+
+
+@clippy
+def example_method(arg1, arg2, arg3=None):
+    return f"{arg1} {arg2} {arg3}"
 
 
 class TestCommandModule(unittest.TestCase):
@@ -51,6 +57,10 @@ class TestCommandModule(unittest.TestCase):
     def test_print_help(self):
         command_module = CommandModule(index=0)
         command_module.print_help()
+
+    def test_longest(self):
+        command_module = CommandModule(index=0)
+        self.assertEqual(9, command_module.longest_param_name_length)
 
 
 if __name__ == "__main__":
