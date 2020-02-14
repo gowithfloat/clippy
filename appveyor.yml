@@ -1,12 +1,14 @@
 environment:
   matrix:
-  - TOXENV: py36
-  - TOXENV: py37
-  - TOXENV: py38
+  - PYTHON: "C:\Python38"
+  - PYTHON: "C:\Python37"
+  - PYTHON: "C:\Python36"
 
 build: false
 
 install:
+- SET PATH=%PYTHON%;%path%
+- "python --version"
 - pip install -r requirements.txt
 
 test_script:
