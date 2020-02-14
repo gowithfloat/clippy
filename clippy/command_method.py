@@ -154,7 +154,7 @@ class CommandMethod:
         return self._name
 
     @property
-    def details(self) -> str:
+    def documentation(self) -> str:
         """Returns the documentation associated with this function, or a default value."""
         return self._main if self._main else "No documentation provided."
 
@@ -277,7 +277,7 @@ class CommandMethod:
 
         :param module_name: The name of the module in which this method appears.
         """
-        print(self.details)
+        print(self.documentation)
         print("\nUsage:")
         print(f"\tpython -m {module_name} {self.name} {self.short_params}")
         longest = self.longest_param_name_length
