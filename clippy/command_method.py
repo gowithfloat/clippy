@@ -6,14 +6,14 @@ Defines a function within a module, including its name, documentation, and param
 """
 
 import ast
-import inspect
 from ast import FunctionDef
+import inspect
 from types import ModuleType
-from typing import Dict, List, Optional, Callable, Tuple, Any, Sized
+from typing import Any, Callable, Dict, List, Optional, Sized, Tuple
 
 from .command_param import CommandParam
 from .command_return import CommandReturn
-from .common import string_remove, right_pad
+from .common import right_pad, string_remove
 
 
 def _is_empty(iterable) -> bool:
@@ -180,7 +180,7 @@ class CommandMethod:
     @property
     def longest_param_name_length(self) -> int:
         """Returns the length of the longest parameter name, or zero if this function has no parameters."""
-        if len(self.params) < 1:
+        if not self.params:
             return 0
 
         return len(max(self.params.keys(), key=len))

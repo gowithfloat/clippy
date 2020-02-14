@@ -6,7 +6,7 @@ Defines one parameter in a function, including its name, documentation (if prese
 """
 
 
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
 
 
 class CommandParam:

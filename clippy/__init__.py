@@ -9,5 +9,5 @@ Any function annotated with `@clippy` will have it's name, parameters, type anno
 
 # flake8: noqa
 
-from .clip import clippy  # pylint: disable=unused-import
 from .clip import begin_clippy  # pylint: disable=unused-import
+from .clip import clippy  # pylint: disable=unused-import

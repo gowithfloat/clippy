@@ -6,16 +6,16 @@ Defines a Python module and the functions it contains.
 """
 
 import ast
-import os
+from ast import FunctionDef, Module, stmt
 import importlib
+import os
 import inspect
-from ast import Module, FunctionDef, stmt
 from inspect import FrameInfo
 from types import ModuleType
-from typing import Dict, List, Iterable
+from typing import Dict, Iterable, List
 
-from .common import is_clippy_command
 from .command_method import CommandMethod
+from .common import is_clippy_command
 
 
 def _get_parent_stack_frame(index: int) -> FrameInfo:
