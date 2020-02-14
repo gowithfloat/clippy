@@ -1,0 +1,13 @@
+environment:
+  matrix:
+  - TOXENV: py36
+  - TOXENV: py37
+  - TOXENV: py38
+
+build: false
+
+install:
+- pip install -r requirements.txt
+
+test_script:
+- python -m unittest discover -s tests -v

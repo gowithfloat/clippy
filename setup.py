@@ -2,6 +2,10 @@ import os
 import setuptools
 import sys
 
+from version_query import predict_version_str
+
+__version__ = predict_version_str()
+
 this_version = sys.version_info[:2]
 reqd_version = (3, 6)
 
@@ -16,7 +20,7 @@ with open(os.path.join(this_folder, "readme.md"), encoding="utf-8") as f:
 
 setuptools.setup(
     name="Clippy",
-    version="0.4.0",
+    version=__version__,
     author="Steve Richey",
     author_email="srichey@gowithfloat.com",
     description="Clippy generates command-line interfaces for Python modules.",
