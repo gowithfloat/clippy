@@ -15,7 +15,7 @@ from types import ModuleType
 from typing import Dict, Iterable, List
 
 from .command_method import CommandMethod
-from .common import is_clippy_command
+from .common import is_clippy_command, right_pad
 
 
 def _get_parent_stack_frame(index: int) -> FrameInfo:
@@ -146,6 +146,15 @@ class CommandModule:
         """Returns true if this module has version information, false otherwise."""
         return hasattr(self._imported_module, "__version__")
 
+    @property
+    def longest_param_name_length(self) -> int:
+        """Returns the length of the longest parameter name, or zero if this function has no parameters."""
+        if not self.commands:
+            return 0
+
+        param_lengths = list(map(lambda x: x.longest_param_name_length, self.commands.values()))
+        return max(param_lengths + [len("--version"), len("--help")])
+
     def __init__(self, index: int = 1):
         """
         Creates a new object to hold module information.
@@ -178,13 +187,14 @@ class CommandModule:
         if self.has_version:
             print(f"\tpython -m {self.name} --version")
 
+        longest = self.longest_param_name_length
+
         print("\nOptions:")
-        print("\t--{:20}  {}".format("help", "Show this screen."))
+        print("\t--{}\t{}".format(right_pad("help", longest), "Show this screen."))
 
         if self.has_version:
-            print("\t--{:20}  {}".format("version", "Show version information."))
+            print("\t--{}\t{}".format(right_pad("version", longest), "Show version information."))
 
         for command in self.commands.values():
-            for param in command.params.values():
-                if param.has_default:
-                    print("\t--{:20}  {}".format(param.name, param.documentation))
+            for param in command.optional_params:
+                print("\t--{}\t{}".format(right_pad(param.name, longest), param.documentation))
