@@ -52,14 +52,12 @@ You will now receive information about the annotated method. This information is
 This is a Python module.
 
 Usage:
-  python -m examples.readme some_function <foo> [--bar=<str>]
-  python -m examples.readme --help
-  python -m examples.readme --version
+	python -m examples.readme some_function <foo> [--bar=<str>] 
+	python -m examples.readme --help
 
 Options:
-  --help                  Show this screen.
-  --version               Show version information.
-  --bar                   The second parameter.
+	--help   Show this screen.
+	--bar    The second parameter.
 ```
 
 Each command can then provide additional help information as needed.
@@ -74,14 +72,14 @@ Which results in the following output:
 This is some function.
 
 Usage:
-  python -m examples.readme some_function <foo> [--bar=<str>]
+	python -m examples.readme some_function <foo> [--bar=<str>] 
 
 Positional arguments:
-  foo                   The first parameter.
+	foo      The first parameter.
 
 Options:
-  --help                  Show this screen.
-  --bar                   The second parameter.
+	--help   Show this screen.
+	--bar    The second parameter.
 ```
 
 Note that any parameter that has a default value is treated as an option requiring a label with the `--` prefix. Required parameters are treated as positional arguments. The goal is to closely match the [docopt](http://docopt.org/) specification.

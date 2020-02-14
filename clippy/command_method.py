@@ -181,9 +181,9 @@ class CommandMethod:
     def longest_param_name_length(self) -> int:
         """Returns the length of the longest parameter name, or zero if this function has no parameters."""
         if not self.params:
-            return 0
+            return len("--help")
 
-        return len(max(self.params.keys(), key=len))
+        return len(max(list(self.params.keys()) + ["--help"], key=len))
 
     @property
     def short_params(self) -> str:
@@ -291,13 +291,13 @@ class CommandMethod:
             print("\nPositional arguments:")
 
             for param in self.required_params:
-                print("\t{}\t{}".format(right_pad(param.name, longest), param.documentation))
+                print("\t{}   {}".format(right_pad(param.name, longest), param.documentation))
 
         print("\nOptions:")
-        print("\t--{}\t{}".format(right_pad("help", longest), "Show this screen."))
+        print("\t--{} {}".format(right_pad("help", longest), "Show this screen."))
 
         for param in self.optional_params:
-            print("\t--{}\t{}".format(right_pad(param.name, longest), param.documentation))
+            print("\t--{} {}".format(right_pad(param.name, longest), param.documentation))
 
     def call(self, args: Dict):
         """

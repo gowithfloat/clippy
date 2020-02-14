@@ -190,11 +190,11 @@ class CommandModule:
         longest = self.longest_param_name_length
 
         print("\nOptions:")
-        print("\t--{}\t{}".format(right_pad("help", longest), "Show this screen."))
+        print("\t--{} {}".format(right_pad("help", longest), "Show this screen."))
 
         if self.has_version:
-            print("\t--{}\t{}".format(right_pad("version", longest), "Show version information."))
+            print("\t--{} {}".format(right_pad("version", longest), "Show version information."))
 
         for command in self.commands.values():
             for param in command.optional_params:
-                print("\t--{}\t{}".format(right_pad(param.name, longest), param.documentation))
+                print("\t--{} {}".format(right_pad(param.name, longest), param.documentation))
