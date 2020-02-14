@@ -52,14 +52,20 @@ def _get_module_impl(stack_frame: FrameInfo) -> ModuleType:
     :param stack_frame: A stack frame of at least one.
     :returns: The loaded module.
     """
-    if len(stack_frame) < 1:
+    if not stack_frame:
         raise ValueError("Empty parent stack frame")
+
+    if not isinstance(stack_frame, FrameInfo):
+        raise TypeError(f"Parameter stack_frame must be FrameInfo, received {type(stack_frame)}")
 
     # retrieve (but do not import) the calling module
     parent_module = inspect.getmodule(stack_frame[0])
 
     if parent_module is None:
         raise ValueError("No module found in parent stack frame")
+
+    if parent_module.__spec__ is None:
+        raise ValueError("Frame info does not contain a module spec")
 
     # return the parent module and the name of the parent module
     return parent_module

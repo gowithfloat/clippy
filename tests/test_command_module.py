@@ -6,11 +6,12 @@ Tests for command_module.py
 """
 
 import unittest
+from inspect import FrameInfo
 
 from clippy import clippy
 
 # noinspection PyProtectedMember
-from clippy.command_module import CommandModule, _parse_ast, _get_parent_stack_frame
+from clippy.command_module import CommandModule, _parse_ast, _get_parent_stack_frame, _get_module_impl
 
 __version__ = "0.0.1"
 
@@ -119,6 +120,18 @@ class TestCommandModule(unittest.TestCase):
             out = _get_parent_stack_frame(1, [None])
 
         self.assertRaises(TypeError, invalid)
+
+    def test_get_module_impl_type(self):
+        def invalid():
+            _ = _get_module_impl(12)
+
+        self.assertRaises(TypeError, invalid)
+
+    def test_get_module_impl_empty(self):
+        def invalid():
+            _ = _get_module_impl(FrameInfo(frame="test", filename="test", lineno=0, function="test", code_context="test", index=0))
+
+        self.assertRaises(ValueError, invalid)
 
 
 if __name__ == "__main__":

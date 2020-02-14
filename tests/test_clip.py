@@ -42,7 +42,7 @@ class TestClip(unittest.TestCase):
 
     def test_begin_version(self):
         def valid():
-            begin_clippy(["--version"])
+            begin_clippy(["some_module", "--version"])
 
         self.assertRaises(SystemExit, valid)
 

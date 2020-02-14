@@ -12,7 +12,7 @@ import unittest
 from ast import FunctionDef
 
 # noinspection PyProtectedMember
-from clippy.command_method import CommandMethod, _function_docs_from_string
+from clippy.command_method import CommandMethod, _function_docs_from_string, _read_param_pair
 
 
 def test_method(arg1, arg2=None):
@@ -214,6 +214,10 @@ class TestCommandMethod(unittest.TestCase):
         docs = "\n"
         out = _function_docs_from_string(docs)
         self.assertEqual((None, None, None), out)
+
+    def test_read_param_pair(self):
+        output = _read_param_pair(0, ["--arg1=2"], ["arg1"])
+        self.assertEqual(("arg1", "2", 1), output)
 
 
 if __name__ == "__main__":
