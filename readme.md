@@ -70,7 +70,7 @@ python -m examples.readme some_function --help
 
 Which results in the following output:
 
-```
+```bash
 This is some function.
 
 Usage:
