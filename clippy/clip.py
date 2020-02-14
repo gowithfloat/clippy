@@ -8,7 +8,7 @@ Any function annotated with `@clippy` will have it's name, parameters, type anno
 """
 
 import sys
-from typing import Callable
+from typing import Callable, Optional, List
 
 from .command_module import CommandModule
 
@@ -24,19 +24,24 @@ def clippy(func: Callable) -> Callable:
     return func
 
 
-def begin_clippy() -> None:
+def begin_clippy(arguments: Optional[List[str]] = None) -> None:
     """
     Invoke Clippy to parse the calling module and generate command-line arguments.
+
+    :param arguments: The arguments to the program. Optional. Defaults to `sys.argv`.
     """
+    if arguments is None:
+        arguments = sys.argv
+
     command_module = CommandModule()
 
     # if no args are given, print available commands and exit (with an error code)
-    if len(sys.argv) < 2:
+    if len(arguments) < 2:
         command_module.print_help()
         sys.exit(1)
 
     # read the command, which is just the first argument
-    command = sys.argv[1]
+    command = arguments[1]
 
     # if the user requested help intentionally, print available commands and exit (with a success code)
     if command == "--help":
@@ -61,7 +66,7 @@ def begin_clippy() -> None:
     target_command = command_module.commands[command]
 
     # read the provided arguments to the command
-    param_pairs = target_command.parse_arguments(sys.argv[2:])
+    param_pairs = target_command.parse_arguments(arguments[2:])
 
     # print help info if requested
     if "help" in param_pairs:
