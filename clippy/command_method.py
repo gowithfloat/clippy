@@ -203,6 +203,11 @@ class CommandMethod:
 
         return result
 
+    @property
+    def return_value(self) -> CommandReturn:
+        """Returns information related to the return value of this function."""
+        return self._return
+
     def __init__(self, function_definition: FunctionDef, module: ModuleType):
         """
         Creates a new object to hold function information.
