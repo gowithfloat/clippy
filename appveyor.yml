@@ -8,6 +8,8 @@ build: false
 
 install:
 - SET PATH=%PYTHON%;%path%
+- echo $PYTHON%
+- echo %path%
 - "python --version"
 - pip install -r requirements.txt
 
