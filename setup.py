@@ -9,7 +9,7 @@ import os
 import sys
 import setuptools
 
-from version_query import predict_version_str
+from version_query import predict_version_str  # pylint: disable=import-error
 
 __version__ = predict_version_str()
 
