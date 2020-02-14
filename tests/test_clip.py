@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Tests for clip.py
+"""
+
 import unittest
 
 from clippy import clippy, begin_clippy

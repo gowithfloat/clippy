@@ -1,17 +1,24 @@
 environment:
   matrix:
-  - TOXENV: py36
+    - ARCHITECTURE: "x64"
+      PYTHON_VERSION: "3.6"
+      PYTHON: "C:\\Python36-x64"
+    - ARCHITECTURE: "x64"
+      PYTHON_VERSION: "3.7"
+      PYTHON: "C:\\Python37-x64"
+    - ARCHITECTURE: "x64"
+      PYTHON_VERSION: "3.8"
+      PYTHON: "C:\\Python38-x64"
 
 build: false
 
+init:
+  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+
 install:
-- SET PATH=%PYTHON%;%path%
-- echo $PYTHON%
-- echo %path%
-- python --version
-- python3 --version
-- pip install -r requirements.txt
-- pip install tox
+  - python --version
+  - python -m pip install -U pip
+  - python -m pip install -U -r requirements.txt
 
 test_script:
-- tox
+  - python -m unittest discover -s tests -v

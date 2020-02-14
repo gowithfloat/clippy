@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+"""
+Tests for command_method.py
+"""
+
 import ast
 import importlib
 import inspect
 import unittest
 from ast import FunctionDef
-from types import ModuleType
 
 from clippy.command_method import CommandMethod
 

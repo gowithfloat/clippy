@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Tests for command_return.py
+"""
+
 import unittest
 
 from clippy.command_return import CommandReturn
