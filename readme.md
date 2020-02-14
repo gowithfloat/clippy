@@ -48,7 +48,7 @@ python -m examples.readme
 
 You will now receive information about the annotated method. This information is all based on the docstrings and annotations you've already provided in your code.
 
-```
+```bash
 This is a Python module.
 
 Usage:
@@ -88,7 +88,7 @@ Note that any parameter that has a default value is treated as an option requiri
 
 Functions that are missing documentation or type annotations will use default or placeholder values. Essentially, any valid Python function will be parsed and available on the command line.
 
-## Why Clippy?
+## Why Clippy
 
 There are a number of comparable Python packages available. Clippy is designed specifically to make your existing module functions available on the command line with little effort, without modifying the way these functions behave currently.
 

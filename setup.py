@@ -1,22 +1,29 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Clippy module configuration.
+"""
+
 import os
-import setuptools
 import sys
+import setuptools
 
 from version_query import predict_version_str
 
 __version__ = predict_version_str()
 
-this_version = sys.version_info[:2]
-reqd_version = (3, 6)
+THIS_VERSION = sys.version_info[:2]
+REQUIRED_VERSION = (3, 6)
 
-if this_version < reqd_version:
+if THIS_VERSION < REQUIRED_VERSION:
     sys.stderr.write("Python version is not high enough to run this library.")
     sys.exit(1)
 
-this_folder = os.path.abspath(os.path.dirname(__file__))
+THIS_FOLDER = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(this_folder, "readme.md"), encoding="utf-8") as f:
-    long_description = f.read()
+with open(os.path.join(THIS_FOLDER, "readme.md"), encoding="utf-8") as f:
+    LONG_DESCRIPTION = f.read()
 
 setuptools.setup(
     name="Clippy",
@@ -24,7 +31,7 @@ setuptools.setup(
     author="Steve Richey",
     author_email="srichey@gowithfloat.com",
     description="Clippy generates command-line interfaces for Python modules.",
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/gowithfloat/clippy",
     packages=setuptools.find_packages(),
