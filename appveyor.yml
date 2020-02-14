@@ -1,8 +1,8 @@
 environment:
   matrix:
-  - PYTHON: "C:\Python38"
-  - PYTHON: "C:\Python37"
-  - PYTHON: "C:\Python36"
+  - TOXENV: py38
+  - TOXENV: py37
+  - TOXENV: py36
 
 build: false
 
@@ -12,6 +12,7 @@ install:
 - echo %path%
 - "python --version"
 - pip install -r requirements.txt
+- pip install tox
 
 test_script:
-- python -m unittest discover -s tests -v
+- tox
