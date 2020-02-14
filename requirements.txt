@@ -8,3 +8,4 @@ coverage
 setuptools
 wheel
 version_query
+codacy-coverage
