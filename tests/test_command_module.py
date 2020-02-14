@@ -4,7 +4,7 @@
 """
 Tests for command_module.py
 """
-
+import inspect
 import unittest
 from inspect import FrameInfo
 
@@ -143,6 +143,17 @@ class TestCommandModule(unittest.TestCase):
     def test_get_module_impl_none(self):
         def invalid():
             _ = _get_module_impl(None)
+
+        self.assertRaises(ValueError, invalid)
+
+    def test_get_module_impl_no_spec(self):
+        def invalid():
+            parent_stack_frame = _get_parent_stack_frame(1)
+            parent_module = inspect.getmodule(parent_stack_frame[0])
+
+            # this simulates the scenario where we try to get a module without a module in the stack
+            setattr(parent_module, "__spec__", None)
+            _ = _get_module_impl(parent_stack_frame)
 
         self.assertRaises(ValueError, invalid)
 
