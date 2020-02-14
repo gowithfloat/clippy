@@ -197,7 +197,7 @@ class CommandMethod:
                 elif param.annotation is None:
                     result += f"[--{param.name}=<{param.name[:2]}>] "
                 else:
-                    result += f"[--{param.name}=<{param.annotation.__name__}>] "
+                    result += f"[--{param.name}=<{param.annotation_name}>] "
             else:
                 result += f"<{param.name}> "
 

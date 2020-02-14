@@ -33,6 +33,14 @@ class CommandParam:
         return self._annotation
 
     @property
+    def annotation_name(self) -> Optional[str]:
+        """Returns the name of the type annotation associated with the parameter, if provided."""
+        if not self._annotation:
+            return None
+
+        return self._annotation.__name__
+
+    @property
     def has_default(self) -> bool:
         """Returns true if this parameter has a default value, false otherwise."""
         return self._has_default
