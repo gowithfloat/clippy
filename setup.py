@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Clippy module configuration.
+Clippy generates command-line interfaces for Python modules.
 """
 
 import os
@@ -30,7 +30,7 @@ setuptools.setup(
     version=__version__,
     author="Steve Richey",
     author_email="srichey@gowithfloat.com",
-    description="Clippy generates command-line interfaces for Python modules.",
+    description=__doc__,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/gowithfloat/clippy",
