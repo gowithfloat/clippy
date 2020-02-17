@@ -42,6 +42,22 @@ matrix:
         - pip3 install -r requirements.txt
       script:
         - python3 -m unittest discover -s tests -v
+    - name: "Python 3.8 - macOS"
+      os: osx
+      osx_image: xcode11
+      language: shell
+      before_install:
+        - brew update
+        - brew install pyenv
+        - eval "$(pyenv init -)"
+        - pyenv install 3.8.1
+        - pyenv shell 3.8.1
+        - python --version
+        - python -m pip install --upgrade pip
+      install:
+        - echo "pass"
+      script:
+        - python -m unittest discover -s tests -v
     - name: "Python 3.6 - Windows"
       os: windows
       language: shell
