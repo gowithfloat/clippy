@@ -92,6 +92,15 @@ There are a number of comparable Python packages available. Clippy is designed s
 
 If you'd like to create more comprehensive tools specifically for the command line, check out [Click](https://click.palletsprojects.com/en/7.x/). If you'd like to make scripts with extensive customization of command-line flags, try [argparse](https://docs.python.org/3/library/argparse.html). If you'd like to parse or verify existing documentation, try [docopt](https://github.com/docopt/docopt).
 
+## Todo
+
+- [ ] Use hypothesis to improve tests
+- [ ] Use [mutmut](https://pypi.org/project/mutmut/), [MutPy](https://pypi.org/project/MutPy/), or [Cosmic Ray](https://github.com/sixty-north/cosmic-ray) to improve tests
+- [ ] Send output of examples to [docopt](http://docopt.org/) to verify formatting
+- [ ] Support different parameter formatting, e.g. `@param` vs. `:param` 
+- [ ] Fix automatic uploading of PyPI package on Jenkins build completion
+- [ ] Generate, validate, and upload docs
+
 ## License
 
 All content in this repository is shared under an MIT license. See [license.md](https://github.com/gowithfloat/clippy/blob/master/license.md) for details.

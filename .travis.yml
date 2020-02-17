@@ -8,6 +8,26 @@ python:
 os:
   - linux
 
+matrix:
+  include:
+    - name: "macOS - Python 3.6.5"
+      os: osx
+      osx_image: xcode9.4
+      language: shell
+      before_install:
+        - python3 --version
+      script:
+        - python3 -m unittest discover -s tests -v
+    - name: "Windows - Python 3.6.8"
+      os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.6.8
+        - python --version
+      script:
+        - python -m unittest discover -s tests -v
+      env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
+
 install:
   - pip install -r requirements.txt
 
