@@ -2,12 +2,12 @@
 
 Clippy (Command Line Interface Parser for Python) crawls the abstract syntax tree (AST) of a Python file and generates a simple command-line interface.
 
-## Installation (WIP)
+## Installation
 
-Clippy can be installed via [pip](https://pip.pypa.io/en/stable/installing/). This is currently available only on TestPyPI.
+Clippy can be installed via [pip](https://pip.pypa.io/en/stable/installing/).
 
 ```bash
-pip install -i https://test.pypi.org/simple/ Clippy
+pip install Clippy
 ```
 
 Clippy requires Python 3.6. There is no plan to support Python 2 at this time, but earlier versions of Python 3 may be included in the future.
