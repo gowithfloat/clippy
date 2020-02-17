@@ -1,7 +1,6 @@
 language: python
 
 python:
-  - "3.8"
   - "3.7"
   - "3.6"
 
@@ -10,6 +9,15 @@ os:
 
 matrix:
   include:
+    - name: "Python 3.8 - Linux"
+      os: linux
+      language: python
+      before_install:
+        - python --version
+      install:
+        - echo "pass" # currently disabled; requirements are not needed for tests
+      script:
+        - python -m unittest discover -s tests -v
     - name: "Python 3.6 - macOS"
       os: osx
       osx_image: xcode9.4
@@ -28,7 +36,7 @@ matrix:
         - python --version
         - python -m pip install --upgrade pip
       install:
-        - echo "pass"
+        - echo "pass" # currently disabled; requirements are not needed for tests
       script:
         - python -m unittest discover -s tests -v
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
@@ -40,7 +48,7 @@ matrix:
         - python --version
         - python -m pip install --upgrade pip
       install:
-        - echo "pass"
+        - echo "pass" # currently disabled; requirements are not needed for tests
       script:
         - python -m unittest discover -s tests -v
       env: PATH=/c/Python37:/c/Python36/Scripts:$PATH
@@ -52,7 +60,7 @@ matrix:
         - python --version
         - python -m pip install --upgrade pip
       install:
-        - echo "pass"
+        - echo "pass" # currently disabled; requirements are not needed for tests
       script:
         - python -m unittest discover -s tests -v
       env: PATH=/c/Python38:/c/Python36/Scripts:$PATH
