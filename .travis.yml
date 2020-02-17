@@ -16,6 +16,8 @@ matrix:
       language: shell
       before_install:
         - python3 --version
+      install:
+        - pip3 install -r requirements.txt
       script:
         - python3 -m unittest discover -s tests -v
     - name: "Windows - Python 3.6.8"
