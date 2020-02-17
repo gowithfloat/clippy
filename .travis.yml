@@ -1,17 +1,21 @@
-language: python
-
-python:
-  - "3.7"
-  - "3.6"
-
-os:
-  - linux
-
 matrix:
   include:
+    - name: "Python 3.6 - Linux"
+      os: linux
+      language: python
+      python: "3.6"
+      before_install:
+        - python --version
+    - name: "Python 3.7 - Linux"
+      os: linux
+      language: python
+      python: "3.7"
+      before_install:
+        - python --version
     - name: "Python 3.8 - Linux"
       os: linux
       language: python
+      python: "3.8"
       before_install:
         - python --version
       install:
@@ -21,6 +25,16 @@ matrix:
     - name: "Python 3.6 - macOS"
       os: osx
       osx_image: xcode9.4
+      language: shell
+      before_install:
+        - python3 --version
+      install:
+        - pip3 install -r requirements.txt
+      script:
+        - python3 -m unittest discover -s tests -v
+    - name: "Python 3.7 - macOS"
+      os: osx
+      osx_image: xcode10.2
       language: shell
       before_install:
         - python3 --version
