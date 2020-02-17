@@ -26,6 +26,7 @@ matrix:
       before_install:
         - choco install python --version 3.6.8
         - python --version
+        - python -m pip install --upgrade pip
       script:
         - python -m unittest discover -s tests -v
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
@@ -35,18 +36,20 @@ matrix:
       before_install:
         - choco install python --version 3.7.4
         - python --version
+        - python -m pip install --upgrade pip
       script:
         - python -m unittest discover -s tests -v
-      env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
+      env: PATH=/c/Python37:/c/Python36/Scripts:$PATH
     - name: "Python 3.8 - Windows"
       os: windows
       language: shell
       before_install:
         - choco install python --version 3.8.1
         - python --version
+        - python -m pip install --upgrade pip
       script:
         - python -m unittest discover -s tests -v
-      env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
+      env: PATH=/c/Python38:/c/Python36/Scripts:$PATH
 
 install:
   - pip install -r requirements.txt
