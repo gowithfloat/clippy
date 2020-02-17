@@ -48,6 +48,7 @@ matrix:
       language: shell
       before_install:
         - eval "$(pyenv init -)"
+        - brew update && brew upgrade pyenv
         - pyenv install 3.8.1
         - pyenv shell 3.8.1
         - python --version
