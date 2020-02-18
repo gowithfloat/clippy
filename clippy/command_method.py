@@ -16,6 +16,26 @@ from .command_return import CommandReturn
 from .common import right_pad, string_remove
 
 
+def _remove_optional_prefix(text: str) -> str:
+    """
+    Given a string, remove the `--` prefix for a parameter flag.
+    :param text: The text from which to remove the `--` prefix.
+    :return: The parameter flag without prefix. Will throw if the string is invalid, such as "--".
+    """
+    if not isinstance(text, str):
+        raise ValueError(f"Not a string parameter flag: {text}")
+
+    if not text.startswith("--"):
+        raise ValueError(f"Invalid optional parameter flag: {text}")
+
+    param = string_remove(text, "--")
+
+    if not param:
+        raise ValueError(f"Invalid optional parameter flag: {text}")
+
+    return param
+
+
 def _read_param_pair(idx: int, params: List[str], parameter_names: List[str]) -> Tuple[str, str, int]:
     """
     Given a parameter index, list of parameters, and parameter names, generate a tuple of parameter name, value, and increment to the next parameter.
@@ -30,12 +50,12 @@ def _read_param_pair(idx: int, params: List[str], parameter_names: List[str]) ->
     if param.startswith("--"):
         if "=" in param:
             spl = param.split("=")
-            return string_remove(spl[0], "--"), spl[1], 1
+            return _remove_optional_prefix(spl[0]), spl[1], 1
 
         if idx == (len(params) - 1):
-            return string_remove(params[idx], "--"), "True", 1
+            return _remove_optional_prefix(params[idx]), "True", 1
 
-        return string_remove(params[idx], "--"), params[idx + 1], 2
+        return _remove_optional_prefix(params[idx]), params[idx + 1], 2
 
     if idx < len(parameter_names):
         return parameter_names[idx], params[idx], 1
