@@ -38,7 +38,7 @@ class TestClip(unittest.TestCase):
 
         self.assertEqual(err.exception.code, 1)
 
-    @given(st.text())
+    @given(st.text(alphabet=list('abcdef0123456789')))
     def test_begin_one_argument(self, text):
         with self.assertRaises(SystemExit) as err:
             # noinspection PyTypeChecker
