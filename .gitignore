@@ -8,3 +8,4 @@ dist
 .coverage
 .tox
 coverage.xml
+.hypothesis

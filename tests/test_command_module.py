@@ -7,6 +7,8 @@ Tests for command_module.py
 import inspect
 import unittest
 from inspect import FrameInfo
+from hypothesis import given
+import hypothesis.strategies as st
 
 from clippy import clippy
 
@@ -58,22 +60,24 @@ class TestCommandModule(unittest.TestCase):
 
     def test_print_help(self):
         command_module = CommandModule(index=0)
-        command_module.print_help()
+        self.assertIsNotNone(command_module.help())
 
     def test_longest(self):
         command_module = CommandModule(index=0)
         self.assertEqual(9, command_module.longest_param_name_length)
 
-    def test_parse_ast_invalid_type(self):
+    @given(st.integers())
+    def test_parse_ast_invalid_type(self, number):
         def invalid():
             # noinspection PyTypeChecker
-            _ = _parse_ast(37)
+            _ = _parse_ast(number)
 
         self.assertRaises(TypeError, invalid)
 
-    def test_parse_ast_no_file(self):
+    @given(st.text())
+    def test_parse_ast_no_file(self, filename):
         def invalid():
-            _ = _parse_ast("does_not_exist.py")
+            _ = _parse_ast(filename)
 
         self.assertRaises(ValueError, invalid)
 
@@ -93,50 +97,57 @@ class TestCommandModule(unittest.TestCase):
         stack_frame = _get_parent_stack_frame(1)
         self.assertIsNotNone(stack_frame)
 
-    def test_get_parent_stack_frame_invalid_type(self):
+    @given(st.text())
+    def test_get_parent_stack_frame_invalid_type(self, text):
         def invalid():
             # noinspection PyTypeChecker
-            _ = _get_parent_stack_frame("1")
+            _ = _get_parent_stack_frame(text)
 
         self.assertRaises(TypeError, invalid)
 
-    def test_get_parent_stack_frame_invalid_index(self):
+    @given(st.integers().filter(lambda x: x > len(inspect.stack())))
+    def test_get_parent_stack_frame_invalid_index(self, idx):
         def invalid():
             # noinspection PyTypeChecker
-            _ = _get_parent_stack_frame(64)
+            _ = _get_parent_stack_frame(idx)
 
         self.assertRaises(ValueError, invalid)
 
-    def test_empty_parent_stack_frame(self):
+    @given(st.integers())
+    def test_empty_parent_stack_frame(self, idx):
         def invalid():
             # noinspection PyTypeChecker
-            _ = _get_parent_stack_frame(1, [])
+            _ = _get_parent_stack_frame(idx, [])
 
         self.assertRaises(ValueError, invalid)
 
-    def test_invalid_parent_stack_frame(self):
+    @given(st.integers().filter(lambda x: x in range(1, 1000)))
+    def test_invalid_parent_stack_frame(self, idx):
         def invalid():
             # noinspection PyTypeChecker
-            _ = _get_parent_stack_frame(1, [None])
+            _ = _get_parent_stack_frame(idx, idx * [None])
 
         self.assertRaises(TypeError, invalid)
 
-    def test_invalid_parent_stack_frame_not_list(self):
+    @given(st.integers().filter(lambda x: x > 0))
+    def test_invalid_parent_stack_frame_not_list(self, idx):
         def invalid():
             # noinspection PyTypeChecker
-            _ = _get_parent_stack_frame(1, dict())
+            _ = _get_parent_stack_frame(idx, dict())
 
         self.assertRaises(TypeError, invalid)
 
-    def test_get_module_impl_type(self):
+    @given(st.integers().filter(lambda x: x != 0))
+    def test_get_module_impl_type(self, number):
         def invalid():
-            _ = _get_module_impl(12)
+            _ = _get_module_impl(number)
 
         self.assertRaises(TypeError, invalid)
 
-    def test_get_module_impl_empty(self):
+    @given(st.text(), st.text(), st.integers(), st.text(), st.text(), st.integers())
+    def test_get_module_impl_empty(self, frm, fil, lin, fun, con, idx):
         def invalid():
-            _ = _get_module_impl(FrameInfo(frame="test", filename="test", lineno=0, function="test", code_context="test", index=0))
+            _ = _get_module_impl(FrameInfo(frame=frm, filename=fil, lineno=lin, function=fun, code_context=con, index=idx))
 
         self.assertRaises(ValueError, invalid)
 

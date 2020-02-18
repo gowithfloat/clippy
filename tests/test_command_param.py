@@ -7,97 +7,113 @@ Tests for command_param.py
 
 import unittest
 
+from hypothesis import given
+import hypothesis.strategies as st
+
 from clippy.command_param import CommandParam
 
 
 class TestCommandParam(unittest.TestCase):
-    def test_create(self):
-        command_param = CommandParam(name="param_name",
+    @given(st.text().filter(lambda x: x))
+    def test_create(self, text):
+        command_param = CommandParam(name=text,
                                      index=0)
-        self.assertEqual("param_name", command_param.name)
+        self.assertEqual(text, command_param.name)
         self.assertEqual(0, command_param.index)
         self.assertIsNotNone(command_param.documentation)
         self.assertIsNone(command_param.annotation)
         self.assertFalse(command_param.has_default)
 
-    def test_create_documentation(self):
-        command_param = CommandParam(name="some_param",
-                                     index=1,
-                                     documentation="This is documentation.")
-        self.assertEqual("This is documentation.", command_param.documentation)
+    @given(st.text().filter(lambda x: x), st.integers(), st.text().filter(lambda x: x))
+    def test_create_documentation(self, nam, idx, doc):
+        command_param = CommandParam(name=nam,
+                                     index=idx,
+                                     documentation=doc)
+        self.assertEqual(doc, command_param.documentation)
 
-    def test_create_annotation(self):
-        command_param = CommandParam(name="another_param",
-                                     index=2,
+    @given(st.text().filter(lambda x: x), st.integers())
+    def test_create_annotation(self, text, idx):
+        command_param = CommandParam(name=text,
+                                     index=idx,
                                      annotation=str)
         self.assertEqual(str, command_param.annotation)
 
-    def test_create_default(self):
-        command_param = CommandParam(name="test",
-                                     index=3,
-                                     default_args={"test": 1})
+    @given(st.text().filter(lambda x: x), st.integers(), st.integers())
+    def test_create_default(self, nam, idx, arg_idx):
+        command_param = CommandParam(name=nam,
+                                     index=idx,
+                                     default_args={nam: arg_idx})
         self.assertTrue(command_param.has_default)
 
-    def test_create_no_default(self):
-        command_param = CommandParam(name="foo",
-                                     index=4,
-                                     default_args={"bar": 1})
+    @given(st.tuples(st.text().filter(lambda x: x), st.text().filter(lambda x: x)).filter(lambda x: x[0] != x[1]), st.integers(), st.integers())
+    def test_create_no_default(self, args, idx1, idx2):
+        command_param = CommandParam(name=args[0],
+                                     index=idx1,
+                                     default_args={args[1]: idx2})
         self.assertFalse(command_param.has_default)
 
-    def test_create_none_name(self):
+    @given(st.none(), st.integers())
+    def test_create_none_name(self, non, idx):
         def create_invalid():
             # noinspection PyTypeChecker
-            return CommandParam(name=None, index=5)
+            return CommandParam(name=non, index=idx)
 
         self.assertRaises(ValueError, create_invalid)
 
-    def test_create_empty_name(self):
+    @given(st.text().filter(lambda x: not x), st.integers())
+    def test_create_empty_name(self, nam, idx):
         def create_invalid():
             # noinspection PyTypeChecker
-            return CommandParam(name="", index=6)
+            return CommandParam(name=nam, index=idx)
 
         self.assertRaises(ValueError, create_invalid)
 
-    def test_create_invalid_name(self):
+    @given(st.integers().filter(lambda x: x), st.integers())
+    def test_create_invalid_name(self, nam, idx):
         def create_invalid():
             # noinspection PyTypeChecker
-            return CommandParam(name=12, index=7)
+            return CommandParam(name=nam, index=idx)
 
         self.assertRaises(TypeError, create_invalid)
 
-    def test_create_none_index(self):
+    @given(st.text(), st.none())
+    def test_create_none_index(self, nam, non):
         def create_invalid():
             # noinspection PyTypeChecker
-            return CommandParam(name="name", index=None)
+            return CommandParam(name=nam, index=non)
 
         self.assertRaises(ValueError, create_invalid)
 
-    def test_create_invalid_index(self):
+    @given(st.text().filter(lambda x: x), st.text())
+    def test_create_invalid_index(self, nam, idx):
         def create_invalid():
             # noinspection PyTypeChecker
-            return CommandParam(name="name", index="9")
+            return CommandParam(name=nam, index=idx)
 
         self.assertRaises(TypeError, create_invalid)
 
-    def test_create_invalid_defaults(self):
+    @given(st.text().filter(lambda x: x), st.text(), st.text().filter(lambda x: x))
+    def test_create_invalid_defaults(self, nam, idx, arg):
         def create_invalid():
             # noinspection PyTypeChecker
-            _ = CommandParam(name="test",
-                             index=10,
-                             default_args="test")
+            _ = CommandParam(name=nam,
+                             index=idx,
+                             default_args=arg)
 
         self.assertRaises(TypeError, create_invalid)
 
-    def test_annotation_name(self):
-        command_param = CommandParam(name="param",
-                                     index=11,
+    @given(st.text().filter(lambda x: x), st.integers())
+    def test_annotation_name(self, nam, idx):
+        command_param = CommandParam(name=nam,
+                                     index=idx,
                                      annotation=str)
         self.assertEqual(str, command_param.annotation)
         self.assertEqual("str", command_param.annotation_name)
 
-    def test_no_annotation_name(self):
-        command_param = CommandParam(name="param",
-                                     index=12)
+    @given(st.text().filter(lambda x: x), st.integers())
+    def test_no_annotation_name(self, nam, idx):
+        command_param = CommandParam(name=nam,
+                                     index=idx)
         self.assertEqual(None, command_param.annotation)
         self.assertEqual(None, command_param.annotation_name)
 

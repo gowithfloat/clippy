@@ -7,6 +7,9 @@ Tests for common.py
 
 import unittest
 
+from hypothesis import given
+import hypothesis.strategies as st
+
 from clippy import clippy
 from clippy.common import string_remove, is_clippy_command, right_pad
 
@@ -21,26 +24,22 @@ def clippy_method(arg):
 
 
 class TestCommon(unittest.TestCase):
-    def test_string_remove(self):
-        str1 = "test example"
-        str2 = "test"
-        str3 = string_remove(str1, str2)
-        self.assertFalse("test" in str3)
+    @given(st.text().filter(lambda x: x))
+    def test_string_remove(self, text):
+        str1 = f"some {text} example"
+        str3 = string_remove(str1, text)
+        self.assertFalse(text in str3)
 
-    def test_string_remove_error1(self):
-        str1 = "test example"
-        str2 = 12
-
+    @given(st.text().filter(lambda x: x), st.integers())
+    def test_string_remove_error1(self, str1, str2):
         def invalid():
             # noinspection PyTypeChecker
             _ = string_remove(str1, str2)
 
         self.assertRaises(TypeError, invalid)
 
-    def test_string_remove_error2(self):
-        str1 = {"test": "example"}
-        str2 = "test"
-
+    @given(st.dictionaries(st.text(), st.text()), st.text().filter(lambda x: x))
+    def test_string_remove_error2(self, str1, str2):
         def invalid():
             # noinspection PyTypeChecker
             _ = string_remove(str1, str2)
@@ -53,41 +52,47 @@ class TestCommon(unittest.TestCase):
     def test_is_not_clippy_command(self):
         self.assertFalse(is_clippy_command(not_clippy_method))
 
-    def test_invalid_clippy_command(self):
+    @given(st.text())
+    def test_invalid_clippy_command(self, text):
         def invalid():
             # noinspection PyTypeChecker
-            _ = is_clippy_command("test")
+            _ = is_clippy_command(text)
 
         self.assertRaises(TypeError, invalid)
 
-    def test_right_pad(self):
-        self.assertEqual("test    ", right_pad("test", 8))
+    @given(st.text().filter(lambda x: len(x) == 4))
+    def test_right_pad(self, text):
+        self.assertEqual(f"{text}    ", right_pad(text, 8))
 
-    def test_negative_right_pad(self):
+    @given(st.text().filter(lambda x: x), st.integers().filter(lambda x: x < 0))
+    def test_negative_right_pad(self, text, count):
         def invalid():
             # noinspection PyTypeChecker
-            _ = right_pad("test", -12)
+            _ = right_pad(text, count)
 
         self.assertRaises(ValueError, invalid)
 
-    def test_empty_right_pad(self):
+    @given(st.text().filter(lambda x: not x), st.integers().filter(lambda x: x > 0))
+    def test_empty_right_pad(self, text, count):
         def invalid():
             # noinspection PyTypeChecker
-            _ = right_pad("", 12)
+            _ = right_pad(text, count)
 
         self.assertRaises(ValueError, invalid)
 
-    def test_none_right_pad(self):
+    @given(st.none(), st.integers().filter(lambda x: x > 0))
+    def test_none_right_pad(self, text, count):
         def invalid():
             # noinspection PyTypeChecker
-            _ = right_pad(None, 12)
+            _ = right_pad(text, count)
 
         self.assertRaises(ValueError, invalid)
 
-    def test_invalid_right_pad(self):
+    @given(st.lists(st.integers(), min_size=1), st.integers().filter(lambda x: x > 0))
+    def test_invalid_right_pad(self, lst, num):
         def invalid():
             # noinspection PyTypeChecker
-            _ = right_pad([12], 12)
+            _ = right_pad(lst, num)
 
         self.assertRaises(TypeError, invalid)
 

@@ -7,6 +7,9 @@ Tests for command_return.py
 
 import unittest
 
+from hypothesis import given
+import hypothesis.strategies as st
+
 from clippy.command_return import CommandReturn
 
 
@@ -21,10 +24,11 @@ class TestCommandReturn(unittest.TestCase):
         self.assertEqual(None, command_return.documentation)
         self.assertEqual(None, command_return.annotation)
 
-    def test_create_with_docs(self):
-        command_return = CommandReturn(documentation="A return value.",
+    @given(st.text())
+    def test_create_with_docs(self, text):
+        command_return = CommandReturn(documentation=text,
                                        annotation=None)
-        self.assertEqual("A return value.", command_return.documentation)
+        self.assertEqual(text, command_return.documentation)
         self.assertEqual(None, command_return.annotation)
 
     def test_create_with_annotation(self):
@@ -33,17 +37,19 @@ class TestCommandReturn(unittest.TestCase):
         self.assertEqual(None, command_return.documentation)
         self.assertEqual(str, command_return.annotation)
 
-    def test_create_invalid_documentation(self):
+    @given(st.integers())
+    def test_create_invalid_documentation(self, idx):
         def create_invalid():
             # noinspection PyTypeChecker
-            return CommandReturn(documentation=3)
+            return CommandReturn(documentation=idx)
 
         self.assertRaises(TypeError, create_invalid)
 
-    def test_create_invalid_annotation(self):
+    @given(st.integers())
+    def test_create_invalid_annotation(self, idx):
         def create_invalid():
             # noinspection PyTypeChecker
-            return CommandReturn(annotation=37)
+            return CommandReturn(annotation=idx)
 
         self.assertRaises(TypeError, create_invalid)
 
