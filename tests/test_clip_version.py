@@ -15,10 +15,10 @@ __version__ = "0.0.1"
 
 class TestClip(unittest.TestCase):
     def test_begin_version(self):
-        def valid():
+        with self.assertRaises(SystemExit) as err:
             begin_clippy(["some_module", "--version"])
 
-        self.assertRaises(SystemExit, valid)
+        self.assertEqual(err.exception.code, 0)
 
 
 if __name__ == "__main__":
