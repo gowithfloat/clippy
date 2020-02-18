@@ -72,7 +72,7 @@ matrix:
         - python -m pip install --upgrade pip
       script:
         - python -m unittest discover -s tests -v
-      env: PATH=/c/Python37:/c/Python36/Scripts:$PATH
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
     - name: "Python 3.8 - Windows"
       os: windows
       language: shell
@@ -82,7 +82,7 @@ matrix:
         - python -m pip install --upgrade pip
       script:
         - python -m unittest discover -s tests -v
-      env: PATH=/c/Python38:/c/Python36/Scripts:$PATH
+      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 
 install:
   - pip install --force-reinstall -r requirements.txt
