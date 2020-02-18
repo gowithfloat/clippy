@@ -18,8 +18,6 @@ matrix:
       python: "3.8"
       before_install:
         - python --version
-      install:
-        - echo "pass" # currently disabled; requirements are not needed for tests
       script:
         - python -m unittest discover -s tests -v
     - name: "Python 3.6 - macOS"
@@ -53,8 +51,6 @@ matrix:
         - pyenv shell 3.8.1
         - python --version
         - python -m pip install --upgrade pip
-      install:
-        - echo "pass"
       script:
         - python -m unittest discover -s tests -v
     - name: "Python 3.6 - Windows"
@@ -64,8 +60,6 @@ matrix:
         - choco install python --version 3.6.8
         - python --version
         - python -m pip install --upgrade pip
-      install:
-        - echo "pass" # currently disabled; requirements are not needed for tests
       script:
         - python -m unittest discover -s tests -v
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
@@ -76,8 +70,6 @@ matrix:
         - choco install python --version 3.7.4
         - python --version
         - python -m pip install --upgrade pip
-      install:
-        - echo "pass" # currently disabled; requirements are not needed for tests
       script:
         - python -m unittest discover -s tests -v
       env: PATH=/c/Python37:/c/Python36/Scripts:$PATH
@@ -88,8 +80,6 @@ matrix:
         - choco install python --version 3.8.1
         - python --version
         - python -m pip install --upgrade pip
-      install:
-        - echo "pass" # currently disabled; requirements are not needed for tests
       script:
         - python -m unittest discover -s tests -v
       env: PATH=/c/Python38:/c/Python36/Scripts:$PATH
