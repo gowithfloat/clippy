@@ -29,6 +29,9 @@ def _get_parent_stack_frame(index: int, stack: Optional[List[FrameInfo]] = None)
     if not isinstance(index, int):
         raise TypeError(f"Parameter index must be an int, received {type(index)}.")
 
+    if index < 0:
+        raise ValueError(f"Parameter index must be zero or greater, received {index}")
+
     if stack is None:
         stack = inspect.stack()
     else:
