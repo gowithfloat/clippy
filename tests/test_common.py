@@ -60,7 +60,7 @@ class TestCommon(unittest.TestCase):
 
         self.assertRaises(TypeError, invalid)
 
-    @given(st.text().filter(lambda x: len(x) == 4))
+    @given(st.text(min_size=4, max_size=4))
     def test_right_pad(self, text):
         self.assertEqual(f"{text}    ", right_pad(text, 8))
 
