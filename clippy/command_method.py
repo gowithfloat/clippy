@@ -221,28 +221,27 @@ class CommandMethod:
             if val.name not in arguments.keys():
                 raise ValueError(f"Command {self.name} is missing required parameter for {val.name}")
 
-    def print_help(self, module_name) -> None:
+    def help(self, module_name) -> str:
         """
-        Print a help message for this method.
+        Build a help message for this method.
 
         :param module_name: The name of the module in which this method appears.
         """
-        print(self.documentation)
-        print("\nUsage:")
-        print(f"\tpython -m {module_name} {self.name} {self.short_params}")
+        result = f"{self.documentation}\n\nUsage:\n\tpython -m {module_name} {self.name} {self.short_params}"
         longest = self.longest_param_name_length
 
         if len(self.params) > 0:
-            print("\nPositional arguments:")
+            result += "\n\nPositional arguments:"
 
             for param in self.required_params:
-                print("\t{}   {}".format(right_pad(param.name, longest), param.documentation))
+                result += f"\t{right_pad(param.name, longest)}   {param.documentation}"
 
-        print("\nOptions:")
-        print("\t--{} {}".format(right_pad("help", longest), "Show this screen."))
+        result += "\n\nOptions:\n\t--{} {}".format(right_pad("help", longest), "Show this screen.")
 
         for param in self.optional_params:
-            print("\t--{} {}".format(right_pad(param.name, longest), param.documentation))
+            result += "\n\t--{} {}".format(right_pad(param.name, longest), param.documentation)
+
+        return result
 
     def call(self, args: Dict):
         """

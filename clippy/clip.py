@@ -37,7 +37,7 @@ def begin_clippy(arguments: Optional[List[str]] = None) -> None:
 
     # if no args are given, print available commands and exit (with an error code)
     if len(arguments) < 2:
-        command_module.print_help()
+        print(command_module.help())
         sys.exit(1)
 
     # read the command, which is just the first argument
@@ -45,7 +45,7 @@ def begin_clippy(arguments: Optional[List[str]] = None) -> None:
 
     # if the user requested help intentionally, print available commands and exit (with a success code)
     if command == "--help":
-        command_module.print_help()
+        print(command_module.help())
         sys.exit(0)
 
     # the version command is only valid if the module has a __version__ attribute
@@ -70,7 +70,7 @@ def begin_clippy(arguments: Optional[List[str]] = None) -> None:
 
     # print help info if requested
     if "help" in param_pairs:
-        target_command.print_help(command_module.name)
+        print(target_command.help(command_module.name))
         sys.exit(0)
 
     # verify that we have all required arguments

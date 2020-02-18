@@ -181,29 +181,29 @@ class CommandModule:
         self._imported_module = importlib.import_module(self.name)
         self._command_list = _get_command_list(parent_stack_frame, self._imported_module)
 
-    def print_help(self):
+    def help(self):
         """
-        Print a help message for this module.
+        Build a help message for this module.
         """
-        print(self.documentation)
-        print("\nUsage:")
+        result = f"{self.documentation}\n\nUsage:"
 
         for (key, val) in self.commands.items():
-            print(f"\tpython -m {self.name} {key} {val.short_params}")
+            result += f"\n\tpython -m {self.name} {key} {val.short_params}"
 
-        print(f"\tpython -m {self.name} --help")
+        result += f"\n\tpython -m {self.name} --help"
 
         if self.has_version:
-            print(f"\tpython -m {self.name} --version")
+            result += f"\n\tpython -m {self.name} --version"
 
         longest = self.longest_param_name_length
 
-        print("\nOptions:")
-        print("\t--{} {}".format(right_pad("help", longest), "Show this screen."))
+        result += "\n\nOptions:\n\t--{} {}".format(right_pad("help", longest), "Show this screen.")
 
         if self.has_version:
-            print("\t--{} {}".format(right_pad("version", longest), "Show version information."))
+            result += "\n\t--{} {}".format(right_pad("version", longest), "Show version information.")
 
         for command in self.commands.values():
             for param in command.optional_params:
-                print("\t--{} {}".format(right_pad(param.name, longest), param.documentation))
+                result += f"\n\t--{right_pad(param.name, longest)} {param.documentation}"
+
+        return result
