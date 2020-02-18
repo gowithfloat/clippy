@@ -85,7 +85,7 @@ matrix:
       env: PATH=/c/Python38:/c/Python36/Scripts:$PATH
 
 install:
-  - pip install -r requirements.txt
+  - pip install --force-reinstall -r requirements.txt
 
 script:
   - bash test_examples.sh
