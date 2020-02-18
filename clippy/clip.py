@@ -60,7 +60,7 @@ def begin_clippy(arguments: Optional[List[str]] = None) -> None:
     # handle unrecognized commands; future versions could try to auto-correct, but that seems fraught with peril
     if command not in command_module.commands.keys():
         # we explicitly encode as utf-8 here in case Windows gave us an invalid string
-        print("Unrecognized command {}".format(str(command).encode("utf-8")))
+        print("Unrecognized command {}".format(command))
         sys.exit(1)
 
     # get the specified command from the list of commands

@@ -77,7 +77,7 @@ class TestClip(unittest.TestCase):
 
         self.assertEqual(err.exception.code, 1)
 
-    @given(st.text().filter(lambda x: not x.startswith("--")))
+    @given(st.text(alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz").filter(lambda x: not x.startswith("--")))
     def test_call_function(self, text):
         begin_clippy(["test_clip", "top_level_function", text])
 
