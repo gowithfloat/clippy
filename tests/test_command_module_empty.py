@@ -21,7 +21,7 @@ class TestCommandModule(unittest.TestCase):
 
     def test_print_help(self):
         command_module = CommandModule(index=0)
-        command_module.print_help()
+        self.assertIsNotNone(command_module.help())
 
     def test_longest(self):
         command_module = CommandModule(index=0)

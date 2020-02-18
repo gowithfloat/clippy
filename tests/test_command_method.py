@@ -169,13 +169,13 @@ class TestCommandMethod(unittest.TestCase):
         definition, module = get_definition("test_function_docs")
         command_method = CommandMethod(function_definition=definition,
                                        module=module)
-        self.assertIsNone(command_method.print_help("test"))
+        self.assertIsNotNone(command_method.help("test"))
 
     def test_print_optional_help(self):
         definition, module = get_definition("test_only_typed_optional")
         command_method = CommandMethod(function_definition=definition,
                                        module=module)
-        self.assertIsNone(command_method.print_help("test"))
+        self.assertIsNotNone(command_method.help("test"))
 
     def test_only_optional(self):
         definition, module = get_definition("test_only_optional")
