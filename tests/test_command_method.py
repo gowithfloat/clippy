@@ -12,7 +12,7 @@ import unittest
 from ast import FunctionDef
 
 # noinspection PyProtectedMember
-from clippy.command_method import CommandMethod, _function_docs_from_string, _read_param_pair
+from clippy.command_method import CommandMethod, _function_docs_from_string, _read_param_pair, create_command_method
 
 
 def test_method(arg1, arg2=None):
@@ -71,74 +71,74 @@ class TestCommandMethod(unittest.TestCase):
         if module is None:
             self.fail("unable to load module")
 
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertIsNotNone(command_method)
 
     def test_name(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual("test_method", command_method.name)
 
     def test_documentation(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual("No documentation provided.", command_method.documentation)
 
     def test_required_params(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual(1, len(command_method.required_params))
 
     def test_optional_params(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual(1, len(command_method.optional_params))
 
     def test_longest_param(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual(6, command_method.longest_param_name_length)
 
     def test_short_params(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual("<arg1> [--arg2=<ar>] ", command_method.short_params)
 
     def test_short_bool(self):
         definition, module = get_definition("test_only_optional")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual("[--arg1] ", command_method.short_params)
 
     def test_short_typed(self):
         definition, module = get_definition("test_only_typed_optional")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual("[--arg1=<int>] ", command_method.short_params)
 
     def test_parse_args(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual({"arg1": "test"}, command_method.parse_arguments(["test"]))
 
     def test_validate_args(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertIsNone(command_method.validate_arguments({"arg1": "test"}))
 
     def test_validate_bad_args(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
 
         def invalid():
             command_method.validate_arguments({"arg2": "test"})
@@ -147,58 +147,58 @@ class TestCommandMethod(unittest.TestCase):
 
     def test_call(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual("test_method: test None", command_method.call({"arg1": "test"}))
 
     def test_no_params(self):
         definition, module = get_definition("test_no_params")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual(6, command_method.longest_param_name_length)
 
     def test_function_documentation(self):
         definition, module = get_definition("test_function_docs")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual("A function to test docs.", command_method.documentation)
         self.assertEqual("An argument.", command_method.params["arg"].documentation)
         self.assertEqual("A return value.", command_method.return_value.documentation)
 
     def test_print_help(self):
         definition, module = get_definition("test_function_docs")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertIsNotNone(command_method.help("test"))
 
     def test_print_optional_help(self):
         definition, module = get_definition("test_only_typed_optional")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertIsNotNone(command_method.help("test"))
 
     def test_only_optional(self):
         definition, module = get_definition("test_only_optional")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual({"arg1": True}, command_method.parse_arguments(["--arg1"]))
 
     def test_last_optional(self):
         definition, module = get_definition("test_last_optional")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual({"arg1": "foo"}, command_method.parse_arguments(["--arg1", "foo"]))
 
     def test_param_typecast(self):
         definition, module = get_definition("test_only_typed_optional")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
         self.assertEqual({"arg1": 12}, command_method.parse_arguments(["--arg1", "12"]))
 
     def test_out_of_bounds(self):
         definition, module = get_definition("test_method")
-        command_method = CommandMethod(function_definition=definition,
-                                       module=module)
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
 
         def invalid():
             command_method.parse_arguments(["foo", "bar", "baz"])

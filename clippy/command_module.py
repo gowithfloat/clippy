@@ -14,7 +14,7 @@ from inspect import FrameInfo
 from types import ModuleType
 from typing import Dict, Iterable, List, Optional
 
-from .command_method import CommandMethod
+from .command_method import CommandMethod, create_command_method
 from .common import is_clippy_command, right_pad
 
 
@@ -125,8 +125,8 @@ def _get_command_list(stack_frame: FrameInfo, imported_module: ModuleType) -> Di
         func_impl = getattr(imported_module, function_definition.name)
 
         if is_clippy_command(func_impl) and function_definition is not None:
-            result[function_definition.name] = CommandMethod(function_definition=function_definition,
-                                                             module=imported_module)
+            result[function_definition.name] = create_command_method(function_definition=function_definition,
+                                                                     module=imported_module)
 
     return result
 
@@ -136,12 +136,12 @@ class CommandModule:
     @property
     def name(self) -> str:
         """Returns the name of this module."""
-        return getattr(self._impl.__spec__, "name")
+        return self._name
 
     @property
     def documentation(self) -> str:
         """Returns the documentation associated with this module, or a default value."""
-        return self._impl.__doc__.strip() if self._impl.__doc__ else "No documentation provided."
+        return self._documentation
 
     @property
     def commands(self) -> Dict[str, CommandMethod]:
@@ -151,12 +151,12 @@ class CommandModule:
     @property
     def version(self) -> str:
         """The version associated with this module, or a default value."""
-        return getattr(self._imported_module, "__version__") if self.has_version else "No version provided."
+        return self._version
 
     @property
     def has_version(self) -> bool:
         """Returns true if this module has version information, false otherwise."""
-        return hasattr(self._imported_module, "__version__")
+        return self._has_version
 
     @property
     def longest_param_name_length(self) -> int:
@@ -167,22 +167,21 @@ class CommandModule:
         param_lengths = list(map(lambda x: x.longest_param_name_length, self.commands.values()))
         return max(param_lengths + [len("--version") if self.has_version else len("--help")])
 
-    def __init__(self, index: int = 1):
+    def __init__(self, name: str, documentation: Optional[str] = None, version: Optional[str] = None, command_list: Optional[Dict[str, CommandMethod]] = None):
         """
         Creates a new object to hold module information.
 
-        :param index: The index of the module to parse, in terms of stack frames. Optional; defaults to one (the parent module).
+        :param name: The name of the module.
+        :param documentation: The documentation associated with the module. Optional. Defaults to "No documentation provided".
+        :param version: The version information associated with the module. Optional. Defaults to "No version provided".
+        :param command_list: The commands available in the module. Optional. Defaults to an empty dictionary.
         """
-        if index is None:
-            raise ValueError("Parameter index is required.")
 
-        if not isinstance(index, int):
-            raise TypeError("Parameter index must be an integer.")
-
-        parent_stack_frame = _get_parent_stack_frame(index + 1)
-        self._impl = _get_module_impl(parent_stack_frame)
-        self._imported_module = importlib.import_module(self.name)
-        self._command_list = _get_command_list(parent_stack_frame, self._imported_module)
+        self._name = name
+        self._documentation = documentation if documentation else "No documentation provided."
+        self._has_version = True if version else False
+        self._version = version if version else "No version provided."
+        self._command_list = command_list if command_list else dict()
 
     def help(self):
         """
@@ -210,3 +209,30 @@ class CommandModule:
                 result += f"\n\t--{right_pad(param.name, longest)} {param.documentation}"
 
         return result
+
+
+def create_command_module(index: int = 1) -> CommandModule:
+    """
+    Creates a new object to hold module information.
+
+    :param index: The index of the module to parse, in terms of stack frames. Optional; defaults to one (the parent module).
+    :return: The newly-created module.
+    """
+    if index is None:
+        raise ValueError("Parameter index is required.")
+
+    if not isinstance(index, int):
+        raise TypeError("Parameter index must be an integer.")
+
+    parent_stack_frame = _get_parent_stack_frame(index + 1)
+    impl = _get_module_impl(parent_stack_frame)
+    name = getattr(impl.__spec__, "name")
+    imported_module = importlib.import_module(name)
+    version = getattr(imported_module, "__version__") if hasattr(imported_module, "__version__") else None
+    documentation = impl.__doc__.strip() if impl.__doc__ else None
+    command_list = _get_command_list(parent_stack_frame, imported_module)
+
+    return CommandModule(name=name,
+                         documentation=documentation,
+                         version=version,
+                         command_list=command_list)

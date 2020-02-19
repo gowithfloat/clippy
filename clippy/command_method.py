@@ -121,7 +121,7 @@ class CommandMethod:
     @property
     def documentation(self) -> str:
         """Returns the documentation associated with this function, or a default value."""
-        return self._main if self._main else "No documentation provided."
+        return self._documentation
 
     @property
     def params(self) -> Dict[str, CommandParam]:
@@ -173,38 +173,30 @@ class CommandMethod:
         """Returns information related to the return value of this function."""
         return self._return
 
-    def __init__(self, function_definition: FunctionDef, module: ModuleType):
+    def __init__(self, name: str, implementation: Callable, documentation: Optional[str] = None, parameters: Optional[Dict[str, CommandParam]] = None, return_value: Optional[CommandReturn] = None):
         """
         Creates a new object to hold function information.
 
-        :param function_definition: A function from the AST. Required.
-        :param module: An imported module.
+        :param name: The name of the method.
+        :param implementation: The actual method implementation. Required.
+        :param documentation: The documentation associated with the function. Optional. Defaults to "No documentation provided.".
+        :param parameters: The parameters to the function. Optional. Defaults to an empty dictionary.
+        :param return_value: The return value of the function. Defaults to None, i.e. no return value.
         """
-        func_impl = getattr(module, function_definition.name)
+        if not isinstance(name, str):
+            raise TypeError(f"Name parameter must be a string, received {type(name)}.")
 
-        method_docs, all_param_docs, return_doc = _function_docs_from_string(ast.get_docstring(function_definition))
+        if not name:
+            raise ValueError("Name parameter is required.")
 
-        func_annotations = func_impl.__annotations__
-        default_args = _get_default_args(func_impl)
+        if not implementation:
+            raise ValueError("Implementation parameter is required.")
 
-        params = dict()
-        func_args = function_definition.args.args
-
-        for (idx, arg) in enumerate(func_args):
-            param_name = arg.arg
-            params[param_name] = CommandParam(name=param_name,
-                                              index=idx,
-                                              documentation=all_param_docs.get(param_name, None) if all_param_docs is not None else None,
-                                              annotation=func_annotations.get(param_name, None),
-                                              default_args=default_args)
-
-        self._name = function_definition.name
-        self._def = function_definition
-        self._impl = func_impl
-        self._params = params
-        self._main = method_docs
-        self._return = CommandReturn(documentation=return_doc,
-                                     annotation=func_annotations.get("return", None))
+        self._name = name
+        self._implementation = implementation
+        self._documentation = documentation if documentation else "No documentation provided."
+        self._params = parameters if parameters else dict()
+        self._return = return_value
 
     def parse_arguments(self, arguments: List[str]) -> Dict[str, Any]:
         """
@@ -269,4 +261,37 @@ class CommandMethod:
 
         :param args: The arguments to pass to the underlying function.
         """
-        return self._impl(**args)
+        return self._implementation(**args)
+
+
+def create_command_method(function_definition: FunctionDef, module: ModuleType) -> CommandMethod:
+    """
+    Creates a new object to hold function information.
+
+    :param function_definition: A function from the AST. Required.
+    :param module: An imported module.
+    """
+    func_impl = getattr(module, function_definition.name)
+
+    method_docs, all_param_docs, return_doc = _function_docs_from_string(ast.get_docstring(function_definition))
+
+    func_annotations = func_impl.__annotations__
+    default_args = _get_default_args(func_impl)
+
+    params = dict()
+    func_args = function_definition.args.args
+
+    for (idx, arg) in enumerate(func_args):
+        param_name = arg.arg
+        params[param_name] = CommandParam(name=param_name,
+                                          index=idx,
+                                          documentation=all_param_docs.get(param_name, None) if all_param_docs is not None else None,
+                                          annotation=func_annotations.get(param_name, None),
+                                          default_args=default_args)
+
+    return CommandMethod(name=function_definition.name,
+                         implementation=func_impl,
+                         documentation=method_docs,
+                         parameters=params,
+                         return_value=CommandReturn(documentation=return_doc,
+                                                    annotation=func_annotations.get("return", None)))

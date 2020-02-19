@@ -10,7 +10,7 @@ Any function annotated with `@clippy` will have it's name, parameters, type anno
 import sys
 from typing import Callable, Optional, List
 
-from .command_module import CommandModule
+from .command_module import create_command_module
 
 
 def clippy(func: Callable) -> Callable:
@@ -33,7 +33,7 @@ def begin_clippy(arguments: Optional[List[str]] = None) -> None:
     if arguments is None:
         arguments = sys.argv
 
-    command_module = CommandModule()
+    command_module = create_command_module()
 
     # if no args are given, print available commands and exit (with an error code)
     if len(arguments) < 2:

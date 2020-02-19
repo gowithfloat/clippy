@@ -13,7 +13,7 @@ import hypothesis.strategies as st
 from clippy import clippy
 
 # noinspection PyProtectedMember
-from clippy.command_module import CommandModule, _parse_ast, _get_parent_stack_frame, _get_module_impl
+from clippy.command_module import _parse_ast, _get_parent_stack_frame, _get_module_impl, create_command_module
 
 __version__ = "0.0.1"
 
@@ -25,45 +25,45 @@ def example_method(arg1, arg2, arg3=None):
 
 class TestCommandModule(unittest.TestCase):
     def test_create(self):
-        command_module = CommandModule(index=0)
+        command_module = create_command_module(index=0)
         self.assertIsNotNone(command_module)
 
     def test_create_invalid1(self):
         def invalid():
             # noinspection PyTypeChecker
-            _ = CommandModule(None)
+            _ = create_command_module(None)
 
         self.assertRaises(ValueError, invalid)
 
     def test_create_invalid2(self):
         def invalid():
             # noinspection PyTypeChecker
-            _ = CommandModule("test")
+            _ = create_command_module("test")
 
         self.assertRaises(TypeError, invalid)
 
     def test_description(self):
-        command_module = CommandModule(index=0)
+        command_module = create_command_module(index=0)
         self.assertEqual("Tests for command_module.py", command_module.documentation)
 
     def test_name(self):
-        command_module = CommandModule(index=0)
+        command_module = create_command_module(index=0)
         self.assertEqual("test_command_module", command_module.name)
 
     def test_version(self):
-        command_module = CommandModule(index=0)
+        command_module = create_command_module(index=0)
         self.assertEqual("0.0.1", command_module.version)
 
     def test_has_version(self):
-        command_module = CommandModule(index=0)
+        command_module = create_command_module(index=0)
         self.assertTrue(command_module.has_version)
 
     def test_print_help(self):
-        command_module = CommandModule(index=0)
+        command_module = create_command_module(index=0)
         self.assertIsNotNone(command_module.help())
 
     def test_longest(self):
-        command_module = CommandModule(index=0)
+        command_module = create_command_module(index=0)
         self.assertEqual(9, command_module.longest_param_name_length)
 
     @given(st.integers())
