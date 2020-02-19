@@ -100,16 +100,16 @@ def top_level_functions(body: List[stmt]) -> Iterable[FunctionDef]:
             yield func
 
 
-def get_function_definitions(stack_frame: FrameInfo, imported_module: ModuleType) -> Iterable[FunctionDef]:
+def get_function_definitions(filename: str, imported_module: ModuleType) -> Iterable[FunctionDef]:
     """
     Gets a list of functions as CommandMethods keyed by their function name from a stack frame and module.
 
-    :param stack_frame: The frame from which to load the functions.
+    :param filename: The name of the file to parse.
     :param imported_module: A module containing functions to load.
     :returns: An iterable of method implementations.
     """
 
-    for function_definition in top_level_functions(parse_ast(stack_frame.filename).body):
+    for function_definition in top_level_functions(parse_ast(filename).body):
         func_impl = getattr(imported_module, function_definition.name)
 
         if is_clippy_command(func_impl) and function_definition is not None:

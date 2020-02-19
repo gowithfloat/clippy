@@ -67,10 +67,7 @@ class CommandMethod(CommandProtocol):
                 result += f"<{param.name}> "
 
         # trim the trailing space
-        if result:
-            result = result[:-1]
-
-        return result
+        return result.strip()
 
     @property
     def return_value(self) -> CommandReturn:

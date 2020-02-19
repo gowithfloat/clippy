@@ -13,7 +13,7 @@ import hypothesis.strategies as st
 from clippy import clippy
 from clippy.command_method import CommandMethod
 
-from clippy.command_module import create_command_module, CommandModule
+from clippy.command_module import create_command_module, CommandModule, create_command_module_for_file
 
 __version__ = "0.0.1"
 
@@ -76,6 +76,13 @@ class TestCommandModule(unittest.TestCase):
         output = command_module.usage()
         self.assertTrue(arg1 in output)
         self.assertTrue(arg2 in output)
+
+    def test_methods_in_module_help(self):
+        command_module = create_command_module_for_file("examples/simple.py")
+        output = command_module.help()
+
+        for method in command_module.commands.values():
+            self.assertTrue(method.name in output)
 
 
 if __name__ == "__main__":

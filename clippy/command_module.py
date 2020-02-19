@@ -4,8 +4,10 @@
 """
 Defines a Python module and the functions it contains.
 """
-
+import inspect
+import os
 import importlib
+from types import ModuleType
 from typing import Dict, Optional, List
 
 from .command_method import CommandMethod, create_command_method
@@ -86,7 +88,30 @@ class CommandModule(CommandProtocol):
         for (key, val) in self.commands.items():
             result += f"\n\tpython -m {self.name} {key} {val.short_params}"
 
-        return result
+        # it's not clear what we need to strip here; but docopt doesn't match unless we do
+        return result.strip()
+
+
+def __create_command_module(imported_module: ModuleType, module_name: str, filename: str) -> CommandModule:
+    """
+    Internal method to create a new object to hold module information.
+
+    :param imported_module: The imported module.
+    :param module_name: The name of the module.
+    :param filename: The name of the file containing the module.
+    :return: The newly-created module.
+    """
+    version = getattr(imported_module, "__version__") if hasattr(imported_module, "__version__") else None
+    documentation = imported_module.__doc__.strip() if imported_module.__doc__ else None
+    command_list = list()
+
+    for definition in get_function_definitions(filename, imported_module):
+        command_list.append(create_command_method(definition, imported_module))
+
+    return CommandModule(name=module_name,
+                         documentation=documentation,
+                         version=version,
+                         command_list=command_list)
 
 
 def create_command_module(index: int = 1) -> CommandModule:
@@ -103,17 +128,50 @@ def create_command_module(index: int = 1) -> CommandModule:
         raise TypeError("Parameter index must be an integer.")
 
     parent_stack_frame = get_parent_stack_frame(index + 1)
-    impl = get_module_impl(parent_stack_frame)
-    name = getattr(impl.__spec__, "name")
-    imported_module = importlib.import_module(name)
-    version = getattr(imported_module, "__version__") if hasattr(imported_module, "__version__") else None
-    documentation = impl.__doc__.strip() if impl.__doc__ else None
-    command_list = list()
 
-    for definition in get_function_definitions(parent_stack_frame, imported_module):
-        command_list.append(create_command_method(definition, imported_module))
+    if not parent_stack_frame:
+        raise ValueError(f"Unable to load stack frame for index {index}")
 
-    return CommandModule(name=name,
-                         documentation=documentation,
-                         version=version,
-                         command_list=command_list)
+    imported_module = get_module_impl(parent_stack_frame)
+
+    if not imported_module:
+        raise ValueError(f"Unable to import module from stack frame: {parent_stack_frame}")
+
+    return __create_command_module(imported_module=imported_module,
+                                   module_name=getattr(imported_module.__spec__, "name"),
+                                   filename=parent_stack_frame.filename)
+
+
+def create_command_module_for_file(filename: str) -> CommandModule:
+    """
+    Creates a new object to hold module information.
+
+    :param filename: The name of the file to parse.
+    :return: The newly-created module.
+    """
+    if not filename:
+        raise ValueError("Parameter filename is required.")
+
+    if not isinstance(filename, str):
+        raise TypeError(f"Parameter filename must be a str, recieved {type(filename)}")
+
+    if not os.path.exists(filename):
+        raise ValueError(f"File not found: {filename}")
+
+    if os.path.isdir(filename):
+        raise ValueError(f"Path is not file: {filename}")
+
+    # this is not a great way to get the module name from the filename
+    module_name = ".".join(os.path.splitext(filename)[0].split(os.sep))
+
+    if not module_name:
+        raise ValueError(f"Unable to determine module name for file: {filename}")
+
+    imported_module = importlib.import_module(module_name)
+
+    if not imported_module:
+        raise ValueError(f"Unable to import module from file: {filename}")
+
+    return __create_command_module(imported_module=imported_module,
+                                   module_name=module_name,
+                                   filename=filename)
