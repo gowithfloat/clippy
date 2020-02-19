@@ -34,5 +34,9 @@ class CommandProtocol:
         if not name:
             raise ValueError("Parameter name is required.")
 
+        if documentation is not None:
+            if not isinstance(documentation, str):
+                raise TypeError("Parameter documentation must be a string, if provided.")
+
         self._name = name
         self._documentation = documentation if documentation else "No documentation provided."

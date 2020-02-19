@@ -7,108 +7,13 @@ Defines a function within a module, including its name, documentation, and param
 
 import ast
 from ast import FunctionDef
-import inspect
 from types import ModuleType
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 from .command_param import CommandParam
 from .command_protocols import CommandProtocol
 from .command_return import CommandReturn
-from .common import right_pad, string_remove
-
-
-def _remove_optional_prefix(text: str) -> str:
-    """
-    Given a string, remove the `--` prefix for a parameter flag.
-    :param text: The text from which to remove the `--` prefix.
-    :return: The parameter flag without prefix. Will throw if the string is invalid, such as "--".
-    """
-    if not isinstance(text, str):
-        raise ValueError(f"Not a string parameter flag: {text}")
-
-    if not text.startswith("--"):
-        raise ValueError(f"Invalid optional parameter flag: {text}")
-
-    param = string_remove(text, "--")
-
-    if not param:
-        raise ValueError(f"Invalid optional parameter flag: {text}")
-
-    return param
-
-
-def _read_param_pair(idx: int, params: List[str], parameter_names: List[str]) -> Tuple[str, str, int]:
-    """
-    Given a parameter index, list of parameters, and parameter names, generate a tuple of parameter name, value, and increment to the next parameter.
-
-    :param idx: The index of the parameter.
-    :param params: The list of parameters.
-    :param parameter_names: The list of parameter names.
-    :returns: A tuple of name, value, and increments.
-    """
-    param = params[idx]
-
-    if param.startswith("--"):
-        if "=" in param:
-            spl = param.split("=")
-            return _remove_optional_prefix(spl[0]), spl[1], 1
-
-        if idx == (len(params) - 1):
-            return _remove_optional_prefix(params[idx]), "True", 1
-
-        return _remove_optional_prefix(params[idx]), params[idx + 1], 2
-
-    if idx < len(parameter_names):
-        return parameter_names[idx], params[idx], 1
-
-    raise ValueError(f"Unexpected argument at index {idx} in {params} with names {parameter_names}")
-
-
-def _function_docs_from_string(docstring: str) -> Tuple[Optional[str], Optional[Dict[str, str]], Optional[str]]:
-    """
-    Parse the given docstring into a tuple of method documentation, parameter documentation, and return type documentation.
-
-    :param docstring: The docstring to parse into individual components.
-    :returns: A tuple of documentation types.
-    """
-    if not docstring:
-        return None, None, None
-
-    all_docs = list(map(lambda x: x.strip(), filter(lambda x: x != "", docstring.split("\n"))))
-
-    if not all_docs:
-        return None, None, None
-
-    has_return = filter(lambda x: ":return:" in x, all_docs)
-    param_docs = dict()
-    param_list = list(all_docs)[1:-1] if has_return else list(all_docs)[1:]
-
-    for doc in param_list:
-        split = list(filter(lambda x: x != "", map(lambda x: x.strip(), doc.split(":"))))
-        param_docs[split[0].replace("param ", "")] = split[1]
-
-    return_doc = None
-
-    if has_return:
-        return_doc = string_remove(all_docs[-1], ":return:").strip()
-
-    return all_docs[0], param_docs, return_doc
-
-
-def _get_default_args(func: Callable) -> Dict[str, Any]:
-    """
-    Return all default arguments for the given function.
-
-    :param func: The function for which to retrieve default arguments.
-    :returns: A dictionary of default arguments.
-    """
-    result = dict()
-
-    for (key, val) in inspect.signature(func).parameters.items():
-        if val.default is not inspect.Parameter.empty:
-            result[key] = val.default
-
-    return result
+from .common import right_pad, get_default_args, function_docs_from_string, read_param_pair
 
 
 class CommandMethod(CommandProtocol):
@@ -118,6 +23,10 @@ class CommandMethod(CommandProtocol):
     def params(self) -> Dict[str, CommandParam]:
         """Returns the parameters (keyed by the parameter name) associated with this function."""
         return self._params
+
+    @property
+    def has_params(self) -> bool:
+        return bool(self._params)
 
     @property
     def required_params(self) -> List[CommandParam]:
@@ -156,6 +65,10 @@ class CommandMethod(CommandProtocol):
                     result += f"[--{param.name}=<{param.annotation_name}>] "
             else:
                 result += f"<{param.name}> "
+
+        # trim the trailing space
+        if result:
+            result = result[:-1]
 
         return result
 
@@ -202,7 +115,7 @@ class CommandMethod(CommandProtocol):
         result = dict()
 
         while idx < len(arguments):
-            name, val, incr = _read_param_pair(idx, arguments, parameters)
+            name, val, incr = read_param_pair(idx, arguments, parameters)
             idx += incr
             result[name] = val
 
@@ -247,6 +160,20 @@ class CommandMethod(CommandProtocol):
 
         return result
 
+    def usage(self, module_name) -> str:
+        """
+        Print just the usage portion for this method.
+
+        :param module_name: The name of the module in which this method appears.
+        :return: The usage description for this method.
+        """
+        result = f"Usage:\n\tpython -m {module_name} {self.name}"
+
+        if self.has_params:
+            result += f"  {self.short_params}"
+
+        return result
+
     def call(self, args: Dict):
         """
         Invoke the implementation of the function to which this object is referring.
@@ -265,10 +192,10 @@ def create_command_method(function_definition: FunctionDef, module: ModuleType) 
     """
     func_impl = getattr(module, function_definition.name)
 
-    method_docs, all_param_docs, return_doc = _function_docs_from_string(ast.get_docstring(function_definition))
+    method_docs, all_param_docs, return_doc = function_docs_from_string(ast.get_docstring(function_definition))
 
     func_annotations = func_impl.__annotations__
-    default_args = _get_default_args(func_impl)
+    default_args = get_default_args(func_impl)
 
     params = dict()
     func_args = function_definition.args.args

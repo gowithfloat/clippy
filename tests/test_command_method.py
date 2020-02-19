@@ -12,7 +12,8 @@ import unittest
 from ast import FunctionDef
 
 # noinspection PyProtectedMember
-from clippy.command_method import CommandMethod, _function_docs_from_string, _read_param_pair, create_command_method
+from clippy.command_method import create_command_method
+from clippy.common import function_docs_from_string, read_param_pair
 
 
 def test_method(arg1, arg2=None):
@@ -109,19 +110,19 @@ class TestCommandMethod(unittest.TestCase):
         definition, module = get_definition("test_method")
         command_method = create_command_method(function_definition=definition,
                                                module=module)
-        self.assertEqual("<arg1> [--arg2=<ar>] ", command_method.short_params)
+        self.assertEqual("<arg1> [--arg2=<ar>]", command_method.short_params)
 
     def test_short_bool(self):
         definition, module = get_definition("test_only_optional")
         command_method = create_command_method(function_definition=definition,
                                                module=module)
-        self.assertEqual("[--arg1] ", command_method.short_params)
+        self.assertEqual("[--arg1]", command_method.short_params)
 
     def test_short_typed(self):
         definition, module = get_definition("test_only_typed_optional")
         command_method = create_command_method(function_definition=definition,
                                                module=module)
-        self.assertEqual("[--arg1=<int>] ", command_method.short_params)
+        self.assertEqual("[--arg1=<int>]", command_method.short_params)
 
     def test_parse_args(self):
         definition, module = get_definition("test_method")
@@ -207,16 +208,16 @@ class TestCommandMethod(unittest.TestCase):
 
     def test_empty_docs_from_string(self):
         docs = ""
-        out = _function_docs_from_string(docs)
+        out = function_docs_from_string(docs)
         self.assertEqual((None, None, None), out)
 
     def test_newline_docs_from_string(self):
         docs = "\n"
-        out = _function_docs_from_string(docs)
+        out = function_docs_from_string(docs)
         self.assertEqual((None, None, None), out)
 
     def test_read_param_pair(self):
-        output = _read_param_pair(0, ["--arg1=2"], ["arg1"])
+        output = read_param_pair(0, ["--arg1=2"], ["arg1"])
         self.assertEqual(("arg1", "2", 1), output)
 
 

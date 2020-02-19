@@ -58,7 +58,7 @@ class TestCommandParam(unittest.TestCase):
             # noinspection PyTypeChecker
             return CommandParam(name=non, index=idx)
 
-        self.assertRaises(ValueError, create_invalid)
+        self.assertRaises(TypeError, create_invalid)
 
     @given(st.text().filter(lambda x: not x), st.integers())
     def test_create_empty_name(self, nam, idx):

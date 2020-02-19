@@ -7,14 +7,11 @@ Defines the return value from a function, including its documentation and type a
 
 from typing import Optional
 
+from clippy.command_protocols import CommandProtocol
 
-class CommandReturn:
+
+class CommandReturn(CommandProtocol):
     """The return value from a function and its associated properties."""
-
-    @property
-    def documentation(self) -> Optional[str]:
-        """The documentation associated with this return value, if provided."""
-        return self._documentation
 
     @property
     def annotation(self) -> Optional[type]:
@@ -28,9 +25,7 @@ class CommandReturn:
         :param documentation: The documentation associated with this return value. Optional.
         :param annotation: The type annotation associated with this return value. Optional.
         """
-        if documentation is not None:
-            if not isinstance(documentation, str):
-                raise TypeError("Parameter documentation must be a string, if provided.")
+        super().__init__("return", documentation)
 
         if annotation is not None:
             if not isinstance(annotation, type):

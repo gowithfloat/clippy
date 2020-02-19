@@ -8,24 +8,16 @@ Defines one parameter in a function, including its name, documentation (if prese
 
 from typing import Any, Dict, Optional
 
+from clippy.command_protocols import CommandProtocol
 
-class CommandParam:
+
+class CommandParam(CommandProtocol):
     """One function parameter and its associated properties."""
-
-    @property
-    def name(self) -> str:
-        """Returns the name of the parameter."""
-        return self._name
 
     @property
     def index(self) -> int:
         """Returns the position of the parameter in the list of parameters."""
         return self._index
-
-    @property
-    def documentation(self) -> str:
-        """Returns the documentation associated with the parameter, or a default value."""
-        return self._documentation
 
     @property
     def annotation(self) -> Optional[type]:
@@ -60,11 +52,7 @@ class CommandParam:
         :param annotation: The type annotation of the parameter. Optional. Defaults to none.
         :param default_args: The default arguments in this parameter's function. Optional. Defaults to none.
         """
-        if not name:
-            raise ValueError("Parameter name is required.")
-
-        if not isinstance(name, str):
-            raise TypeError("Parameter name must be a string.")
+        super().__init__(name, documentation)
 
         if index is None:
             raise ValueError("Parameter index is required.")
@@ -72,9 +60,7 @@ class CommandParam:
         if not isinstance(index, int):
             raise TypeError("Parameter index must be an integer.")
 
-        self._name = name
         self._index = index
-        self._documentation = documentation if documentation else "No documentation provided."
         self._annotation = annotation
 
         if default_args is None:
