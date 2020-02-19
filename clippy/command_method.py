@@ -80,17 +80,16 @@ class CommandMethod(CommandProtocol):
     def __init__(self,
                  implementation: Callable,
                  documentation: Optional[str] = None,
-                 parameters: Optional[Dict[str, CommandParam]] = None,
+                 parameters: Optional[List[CommandParam]] = None,
                  return_value: Optional[CommandReturn] = None):
         """
         Creates a new object to hold function information.
 
         :param implementation: The actual method implementation. Required.
         :param documentation: The documentation associated with the function. Optional. Defaults to "No documentation provided.".
-        :param parameters: The parameters to the function. Optional. Defaults to an empty dictionary.
+        :param parameters: The parameters to the function. Optional. Defaults to None.
         :param return_value: The return value of the function. Defaults to a return None object.
         """
-
         if not callable(implementation):
             raise TypeError("Implementation parameter must be callable.")
 
@@ -99,8 +98,21 @@ class CommandMethod(CommandProtocol):
 
         super().__init__(implementation.__name__, documentation)
 
+        if parameters is not None:
+            if not isinstance(parameters, list):
+                raise TypeError(f"Parameters parameter must be a list if provided, received {type(parameters)}")
+
+        if return_value is not None:
+            if not isinstance(return_value, CommandReturn):
+                raise TypeError(f"Return value parameter must be a CommandReturn if provided, received {type(return_value)}.")
+
         self._implementation = implementation
-        self._params = parameters if parameters else dict()
+
+        if parameters is not None:
+            self._params = {param.name: param for param in parameters}
+        else:
+            self._params = dict()
+
         self._return = return_value if return_value else CommandReturn()
 
     def parse_arguments(self, arguments: List[str]) -> Dict[str, Any]:
@@ -197,16 +209,16 @@ def create_command_method(function_definition: FunctionDef, module: ModuleType) 
     func_annotations = func_impl.__annotations__
     default_args = get_default_args(func_impl)
 
-    params = dict()
+    params = list()
     func_args = function_definition.args.args
 
     for (idx, arg) in enumerate(func_args):
         param_name = arg.arg
-        params[param_name] = CommandParam(name=param_name,
-                                          index=idx,
-                                          documentation=all_param_docs.get(param_name, None) if all_param_docs is not None else None,
-                                          annotation=func_annotations.get(param_name, None),
-                                          default_args=default_args)
+        params += [CommandParam(name=param_name,
+                                index=idx,
+                                documentation=all_param_docs.get(param_name, None) if all_param_docs is not None else None,
+                                annotation=func_annotations.get(param_name, None),
+                                default_args=default_args)]
 
     return CommandMethod(implementation=func_impl,
                          documentation=method_docs,

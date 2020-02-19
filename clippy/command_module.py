@@ -6,7 +6,7 @@ Defines a Python module and the functions it contains.
 """
 
 import importlib
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from .command_method import CommandMethod, create_command_method
 from .command_protocols import CommandProtocol
@@ -40,7 +40,7 @@ class CommandModule(CommandProtocol):
         param_lengths = list(map(lambda x: x.longest_param_name_length, self.commands.values()))
         return max(param_lengths + [len("--version") if self.has_version else len("--help")])
 
-    def __init__(self, name: str, documentation: Optional[str] = None, version: Optional[str] = None, command_list: Optional[Dict[str, CommandMethod]] = None):
+    def __init__(self, name: str, documentation: Optional[str] = None, version: Optional[str] = None, command_list: Optional[List[CommandMethod]] = None):
         """
         Creates a new object to hold module information.
 
@@ -52,7 +52,7 @@ class CommandModule(CommandProtocol):
         super().__init__(name, documentation)
         self._has_version = bool(version)
         self._version = version if version else "No version provided."
-        self._command_list = command_list if command_list else dict()
+        self._command_list = {command.name: command for command in command_list}
 
     def help(self) -> str:
         """
@@ -108,10 +108,10 @@ def create_command_module(index: int = 1) -> CommandModule:
     imported_module = importlib.import_module(name)
     version = getattr(imported_module, "__version__") if hasattr(imported_module, "__version__") else None
     documentation = impl.__doc__.strip() if impl.__doc__ else None
-    command_list = dict()
+    command_list = list()
 
     for definition in get_function_definitions(parent_stack_frame, imported_module):
-        command_list[definition.name] = create_command_method(definition, imported_module)
+        command_list.append(create_command_method(definition, imported_module))
 
     return CommandModule(name=name,
                          documentation=documentation,

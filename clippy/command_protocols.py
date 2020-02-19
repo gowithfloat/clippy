@@ -9,7 +9,7 @@ from typing import Optional
 
 
 class CommandProtocol:
-    """A common class for methods and modules."""
+    """A common class for modules, methods, parameters, and return values."""
 
     @property
     def name(self) -> str:

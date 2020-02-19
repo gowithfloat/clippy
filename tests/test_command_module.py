@@ -7,12 +7,17 @@ Tests for command_module.py
 
 import os
 import unittest
+from hypothesis import given
+import hypothesis.strategies as st
 
 from clippy import clippy
+from clippy.command_method import CommandMethod
 
-from clippy.command_module import create_command_module
+from clippy.command_module import create_command_module, CommandModule
 
 __version__ = "0.0.1"
+
+from clippy.command_param import CommandParam
 
 
 @clippy
@@ -62,6 +67,15 @@ class TestCommandModule(unittest.TestCase):
     def test_longest(self):
         command_module = create_command_module(index=0)
         self.assertEqual(9, command_module.longest_param_name_length)
+
+    @given(st.text().filter(lambda x: x), st.text().filter(lambda x: x))
+    def test_help(self, arg1, arg2):
+        params = [CommandParam(name=arg1, index=0)]
+        commands = [CommandMethod(implementation=example_method, parameters=params)]
+        command_module = CommandModule(name=arg2, command_list=commands)
+        output = command_module.usage()
+        self.assertTrue(arg1 in output)
+        self.assertTrue(arg2 in output)
 
 
 if __name__ == "__main__":
