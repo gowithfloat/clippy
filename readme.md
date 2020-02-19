@@ -95,7 +95,6 @@ If you'd like to create more comprehensive tools specifically for the command li
 ## Todo
 
 -   [x] Use hypothesis to improve tests
--   [ ] Use [mutmut](https://pypi.org/project/mutmut/), [MutPy](https://pypi.org/project/MutPy/), or [Cosmic Ray](https://github.com/sixty-north/cosmic-ray) to improve tests
 -   [ ] Send output of examples to [docopt](http://docopt.org/) to verify formatting
 -   [ ] Support different parameter formatting, e.g. `@param` vs. `:param` 
 -   [ ] Fix automatic uploading of PyPI package on Jenkins build completion
