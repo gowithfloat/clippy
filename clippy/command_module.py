@@ -15,6 +15,7 @@ from types import ModuleType
 from typing import Dict, Iterable, List, Optional
 
 from .command_method import CommandMethod, create_command_method
+from .command_protocols import CommandProtocol
 from .common import is_clippy_command, right_pad
 
 
@@ -131,17 +132,8 @@ def _get_command_list(stack_frame: FrameInfo, imported_module: ModuleType) -> Di
     return result
 
 
-class CommandModule:
+class CommandModule(CommandProtocol):
     """A single module and its associated properties."""
-    @property
-    def name(self) -> str:
-        """Returns the name of this module."""
-        return self._name
-
-    @property
-    def documentation(self) -> str:
-        """Returns the documentation associated with this module, or a default value."""
-        return self._documentation
 
     @property
     def commands(self) -> Dict[str, CommandMethod]:
@@ -176,10 +168,8 @@ class CommandModule:
         :param version: The version information associated with the module. Optional. Defaults to "No version provided".
         :param command_list: The commands available in the module. Optional. Defaults to an empty dictionary.
         """
-
-        self._name = name
-        self._documentation = documentation if documentation else "No documentation provided."
-        self._has_version = True if version else False
+        super().__init__(name, documentation)
+        self._has_version = bool(version)
         self._version = version if version else "No version provided."
         self._command_list = command_list if command_list else dict()
 

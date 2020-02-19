@@ -12,6 +12,7 @@ from types import ModuleType
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .command_param import CommandParam
+from .command_protocols import CommandProtocol
 from .command_return import CommandReturn
 from .common import right_pad, string_remove
 
@@ -110,18 +111,8 @@ def _get_default_args(func: Callable) -> Dict[str, Any]:
     return result
 
 
-class CommandMethod:
+class CommandMethod(CommandProtocol):
     """A function within a module and its associated properties."""
-
-    @property
-    def name(self) -> str:
-        """Returns the name of this function."""
-        return self._name
-
-    @property
-    def documentation(self) -> str:
-        """Returns the documentation associated with this function, or a default value."""
-        return self._documentation
 
     @property
     def params(self) -> Dict[str, CommandParam]:
@@ -173,30 +164,31 @@ class CommandMethod:
         """Returns information related to the return value of this function."""
         return self._return
 
-    def __init__(self, name: str, implementation: Callable, documentation: Optional[str] = None, parameters: Optional[Dict[str, CommandParam]] = None, return_value: Optional[CommandReturn] = None):
+    def __init__(self,
+                 implementation: Callable,
+                 documentation: Optional[str] = None,
+                 parameters: Optional[Dict[str, CommandParam]] = None,
+                 return_value: Optional[CommandReturn] = None):
         """
         Creates a new object to hold function information.
 
-        :param name: The name of the method.
         :param implementation: The actual method implementation. Required.
         :param documentation: The documentation associated with the function. Optional. Defaults to "No documentation provided.".
         :param parameters: The parameters to the function. Optional. Defaults to an empty dictionary.
-        :param return_value: The return value of the function. Defaults to None, i.e. no return value.
+        :param return_value: The return value of the function. Defaults to a return None object.
         """
-        if not isinstance(name, str):
-            raise TypeError(f"Name parameter must be a string, received {type(name)}.")
 
-        if not name:
-            raise ValueError("Name parameter is required.")
+        if not callable(implementation):
+            raise TypeError("Implementation parameter must be callable.")
 
         if not implementation:
             raise ValueError("Implementation parameter is required.")
 
-        self._name = name
+        super().__init__(implementation.__name__, documentation)
+
         self._implementation = implementation
-        self._documentation = documentation if documentation else "No documentation provided."
         self._params = parameters if parameters else dict()
-        self._return = return_value
+        self._return = return_value if return_value else CommandReturn()
 
     def parse_arguments(self, arguments: List[str]) -> Dict[str, Any]:
         """
@@ -289,8 +281,7 @@ def create_command_method(function_definition: FunctionDef, module: ModuleType) 
                                           annotation=func_annotations.get(param_name, None),
                                           default_args=default_args)
 
-    return CommandMethod(name=function_definition.name,
-                         implementation=func_impl,
+    return CommandMethod(implementation=func_impl,
                          documentation=method_docs,
                          parameters=params,
                          return_value=CommandReturn(documentation=return_doc,
