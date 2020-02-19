@@ -4,7 +4,7 @@ Clippy (Command Line Interface Parser for Python) crawls the abstract syntax tre
 
 ## Installation
 
-Clippy is available in [PyPI](https://pypi.org/project/Clippy/) be installed via [pip](https://pip.pypa.io/en/stable/installing/).
+Clippy is available in [PyPI](https://pypi.org/project/Clippy/) and can be installed via [pip](https://pip.pypa.io/en/stable/installing/).
 
 ```bash
 pip install Clippy
