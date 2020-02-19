@@ -4,16 +4,12 @@
 """
 Tests for command_module.py
 """
-import inspect
+
+import os
 import unittest
-from inspect import FrameInfo
-from hypothesis import given
-import hypothesis.strategies as st
 
 from clippy import clippy
 
-# noinspection PyProtectedMember
-from clippy.common import parse_ast, get_parent_stack_frame, get_module_impl
 from clippy.command_module import create_command_module
 
 __version__ = "0.0.1"
@@ -45,15 +41,15 @@ class TestCommandModule(unittest.TestCase):
 
     def test_description(self):
         command_module = create_command_module(index=0)
-        self.assertEqual("Tests for command_module.py", command_module.documentation)
+        self.assertEqual(__doc__.strip(), command_module.documentation)
 
     def test_name(self):
         command_module = create_command_module(index=0)
-        self.assertEqual("test_command_module", command_module.name)
+        self.assertEqual(os.path.splitext(os.path.basename(__file__))[0], command_module.name)
 
     def test_version(self):
         command_module = create_command_module(index=0)
-        self.assertEqual("0.0.1", command_module.version)
+        self.assertEqual(__version__, command_module.version)
 
     def test_has_version(self):
         command_module = create_command_module(index=0)
@@ -66,108 +62,6 @@ class TestCommandModule(unittest.TestCase):
     def test_longest(self):
         command_module = create_command_module(index=0)
         self.assertEqual(9, command_module.longest_param_name_length)
-
-    @given(st.integers())
-    def test_parse_ast_invalid_type(self, number):
-        def invalid():
-            # noinspection PyTypeChecker
-            _ = parse_ast(number)
-
-        self.assertRaises(TypeError, invalid)
-
-    @given(st.text())
-    def test_parse_ast_no_file(self, filename):
-        def invalid():
-            _ = parse_ast(filename)
-
-        self.assertRaises(ValueError, invalid)
-
-    def test_parse_ast_folder(self):
-        def invalid():
-            _ = parse_ast("tests")
-
-        self.assertRaises(ValueError, invalid)
-
-    def test_parse_empty_file(self):
-        def invalid():
-            _ = parse_ast("tests/empty_file.py")
-
-        self.assertRaises(ValueError, invalid)
-
-    def test_get_parent_stack_frame(self):
-        stack_frame = get_parent_stack_frame(1)
-        self.assertIsNotNone(stack_frame)
-
-    @given(st.text())
-    def test_get_parent_stack_frame_invalid_type(self, text):
-        def invalid():
-            # noinspection PyTypeChecker
-            _ = get_parent_stack_frame(text)
-
-        self.assertRaises(TypeError, invalid)
-
-    @given(st.integers().filter(lambda x: x > len(inspect.stack())))
-    def test_get_parent_stack_frame_invalid_index(self, idx):
-        def invalid():
-            # noinspection PyTypeChecker
-            _ = get_parent_stack_frame(idx)
-
-        self.assertRaises(ValueError, invalid)
-
-    @given(st.integers())
-    def test_empty_parent_stack_frame(self, idx):
-        def invalid():
-            # noinspection PyTypeChecker
-            _ = get_parent_stack_frame(idx, [])
-
-        self.assertRaises(ValueError, invalid)
-
-    @given(st.integers().filter(lambda x: x in range(1, 1000)))
-    def test_invalid_parent_stack_frame(self, idx):
-        def invalid():
-            # noinspection PyTypeChecker
-            _ = get_parent_stack_frame(idx, idx * [None])
-
-        self.assertRaises(TypeError, invalid)
-
-    @given(st.integers().filter(lambda x: x > 0))
-    def test_invalid_parent_stack_frame_not_list(self, idx):
-        def invalid():
-            # noinspection PyTypeChecker
-            _ = get_parent_stack_frame(idx, dict())
-
-        self.assertRaises(TypeError, invalid)
-
-    @given(st.integers().filter(lambda x: x != 0))
-    def test_get_module_impl_type(self, number):
-        def invalid():
-            _ = get_module_impl(number)
-
-        self.assertRaises(TypeError, invalid)
-
-    @given(st.text(), st.text(), st.integers(), st.text(), st.text(), st.integers())
-    def test_get_module_impl_empty(self, frm, fil, lin, fun, con, idx):
-        def invalid():
-            _ = get_module_impl(FrameInfo(frame=frm, filename=fil, lineno=lin, function=fun, code_context=con, index=idx))
-
-        self.assertRaises(ValueError, invalid)
-
-    def test_get_module_impl_none(self):
-        def invalid():
-            _ = get_module_impl(None)
-
-        self.assertRaises(ValueError, invalid)
-
-    def test_get_module_impl_no_spec(self):
-        def invalid():
-            parent_stack_frame = get_parent_stack_frame(1)
-            parent_module = inspect.getmodule(parent_stack_frame[0])
-
-            # this simulates the scenario where we try to get a module without a module in the stack
-            setattr(parent_module, "__spec__", None)
-            _ = get_module_impl(parent_stack_frame)
-
-        self.assertRaises(ValueError, invalid)
 
 
 if __name__ == "__main__":

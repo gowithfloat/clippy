@@ -10,10 +10,10 @@ import importlib
 import inspect
 import unittest
 from ast import FunctionDef
+from hypothesis import given
+import hypothesis.strategies as st
 
-# noinspection PyProtectedMember
 from clippy.command_method import create_command_method
-from clippy.common import function_docs_from_string, read_param_pair
 
 
 def test_method(arg1, arg2=None):
@@ -206,19 +206,12 @@ class TestCommandMethod(unittest.TestCase):
 
         self.assertRaises(ValueError, invalid)
 
-    def test_empty_docs_from_string(self):
-        docs = ""
-        out = function_docs_from_string(docs)
-        self.assertEqual((None, None, None), out)
-
-    def test_newline_docs_from_string(self):
-        docs = "\n"
-        out = function_docs_from_string(docs)
-        self.assertEqual((None, None, None), out)
-
-    def test_read_param_pair(self):
-        output = read_param_pair(0, ["--arg1=2"], ["arg1"])
-        self.assertEqual(("arg1", "2", 1), output)
+    @given(st.text())
+    def test_usage_in_help(self, txt):
+        definition, module = get_definition("test_method")
+        command_method = create_command_method(function_definition=definition,
+                                               module=module)
+        self.assertTrue(command_method.usage(txt) in command_method.help(txt))
 
 
 if __name__ == "__main__":

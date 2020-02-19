@@ -54,15 +54,11 @@ class CommandModule(CommandProtocol):
         self._version = version if version else "No version provided."
         self._command_list = command_list if command_list else dict()
 
-    def help(self):
+    def help(self) -> str:
         """
         Build a help message for this module.
         """
-        result = f"{self.documentation}\n\nUsage:"
-
-        for (key, val) in self.commands.items():
-            result += f"\n\tpython -m {self.name} {key} {val.short_params}"
-
+        result = f"{self.documentation}\n\n{self.usage()}"
         result += f"\n\tpython -m {self.name} --help"
 
         if self.has_version:
@@ -78,6 +74,17 @@ class CommandModule(CommandProtocol):
         for command in self.commands.values():
             for param in command.optional_params:
                 result += f"\n\t--{right_pad(param.name, longest)} {param.documentation}"
+
+        return result
+
+    def usage(self) -> str:
+        """
+        Build just the usage portion for this method's help message.
+        """
+        result = "Usage:"
+
+        for (key, val) in self.commands.items():
+            result += f"\n\tpython -m {self.name} {key} {val.short_params}"
 
         return result
 

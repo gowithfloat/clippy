@@ -144,7 +144,7 @@ class CommandMethod(CommandProtocol):
 
         :param module_name: The name of the module in which this method appears.
         """
-        result = f"{self.documentation}\n\nUsage:\n\tpython -m {module_name} {self.name} {self.short_params}"
+        result = f"{self.documentation}\n\n{self.usage(module_name)}"
         longest = self.longest_param_name_length
 
         if len(self.params) > 0:
@@ -162,7 +162,7 @@ class CommandMethod(CommandProtocol):
 
     def usage(self, module_name) -> str:
         """
-        Print just the usage portion for this method.
+        Build just the usage portion for this method's help message.
 
         :param module_name: The name of the module in which this method appears.
         :return: The usage description for this method.
