@@ -1,3 +1,5 @@
+language: generic
+
 matrix:
   include:
     - name: "Python 3.6 - Linux"
@@ -14,7 +16,6 @@ matrix:
       python: "3.8"
     - name: "Python 3.6 - macOS"
       os: osx
-      language: shell
       before_install:
         - eval "$(pyenv init -)"
         - brew update && brew upgrade pyenv
@@ -22,7 +23,6 @@ matrix:
         - pyenv shell 3.6.10
     - name: "Python 3.7 - macOS"
       os: osx
-      language: shell
       before_install:
         - eval "$(pyenv init -)"
         - brew update && brew upgrade pyenv
@@ -30,7 +30,6 @@ matrix:
         - pyenv shell 3.7.6
     - name: "Python 3.8 - macOS"
       os: osx
-      language: shell
       before_install:
         - eval "$(pyenv init -)"
         - brew update && brew upgrade pyenv
@@ -38,19 +37,16 @@ matrix:
         - pyenv shell 3.8.1
     - name: "Python 3.6 - Windows"
       os: windows
-      language: shell
       before_install:
         - choco install python --version 3.6.8
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
     - name: "Python 3.7 - Windows"
       os: windows
-      language: shell
       before_install:
         - choco install python --version 3.7.4
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
     - name: "Python 3.8 - Windows"
       os: windows
-      language: shell
       before_install:
         - choco install python --version 3.8.1
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
