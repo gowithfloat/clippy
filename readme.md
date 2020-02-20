@@ -95,7 +95,7 @@ If you'd like to create more comprehensive tools specifically for the command li
 ## Todo
 
 -   [x] Use hypothesis to improve tests
--   [ ] Send output of examples to [docopt](http://docopt.org/) to verify formatting
+-   [x] Send output of examples to [docopt](http://docopt.org/) to verify formatting
 -   [ ] Support different parameter formatting, e.g. `@param` vs. `:param` 
 -   [ ] Fix automatic uploading of PyPI package on Jenkins build completion
 -   [ ] Generate, validate, and upload docs
