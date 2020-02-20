@@ -7,6 +7,7 @@ Methods common to other files in Clippy.
 
 import inspect
 import os
+import re
 import ast
 from ast import FunctionDef, Module, stmt
 from inspect import FrameInfo
@@ -236,18 +237,29 @@ def function_docs_from_string(docstring: str) -> Tuple[Optional[str], Optional[D
 
     has_return = filter(lambda x: ":return:" in x, all_docs)
     param_docs = dict()
-    param_list = list(all_docs)[1:-1] if has_return else list(all_docs)[1:]
 
-    for doc in param_list:
-        split = list(filter(lambda x: x != "", map(lambda x: x.strip(), doc.split(":"))))
-        param_docs[split[0].replace("param ", "")] = split[1]
+    for doc in all_docs:
+        if "param" in doc:
+            split = doc.rpartition(":")
+            key = re.sub("[@:]+param", "", split[0]).strip()
+
+            if key:
+                param_docs[key] = split[2].strip()
 
     return_doc = None
 
     if has_return:
-        return_doc = string_remove(all_docs[-1], ":return:").strip()
+        stripped = re.sub("[@:]+return[s]?[@:]+", "", all_docs[-1]).strip()
 
-    return all_docs[0], param_docs, return_doc
+        if stripped:
+            return_doc = stripped
+
+    method_doc = None
+
+    if "param" not in all_docs[0] and "return" not in all_docs[0]:
+        method_doc = all_docs[0]
+
+    return method_doc, param_docs, return_doc
 
 
 def get_default_args(func: Callable) -> Dict[str, Any]:
