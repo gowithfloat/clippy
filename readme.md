@@ -97,7 +97,7 @@ If you'd like to create more comprehensive tools specifically for the command li
 -   [x] Use hypothesis to improve tests
 -   [x] Send output of examples to [docopt](http://docopt.org/) to verify formatting
 -   [x] Support different parameter formatting, e.g. `@param` vs. `:param` 
--   [ ] Fix automatic uploading of PyPI package on Jenkins build completion
+-   [x] Fix automatic uploading of PyPI package on Jenkins build completion
 -   [ ] Generate, validate, and upload docs
 -   [ ] Support nested commands, e.g. `python -m my_module parent_method child_method`
 -   [ ] Support Python 3.5
