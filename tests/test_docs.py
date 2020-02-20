@@ -77,3 +77,17 @@ class TestDocs(unittest.TestCase):
         output = command_module.usage()
         result = read_doc_opt(output)
         self.assertEqual(result, output)
+
+    def test_alt_syntax(self):
+        command_module = create_command_module_for_file(os.path.join("examples", "simple.py"))
+        command_method = command_module.commands["documented_two_parameter_alt_syntax"]
+        output = command_method.help("examples.simple")
+        self.assertNotIn("No documentation provided.", output)
+
+    def test_no_method_doc(self):
+        command_module = create_command_module_for_file(os.path.join("examples", "simple.py"))
+        command_method = command_module.commands["one_documented_parameter"]
+        output = command_method.help("examples.simple")
+        print(output)
+        self.assertIn("No documentation provided.", output)
+        self.assertIn("An argument.", output)

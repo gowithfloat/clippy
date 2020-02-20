@@ -24,6 +24,7 @@ python -m examples.simple documented_one_parameter --help
 python -m examples.simple documented_one_typed_parameter --help
 python -m examples.simple documented_one_documented_parameter --help
 python -m examples.simple documented_one_typed_documented_parameter --help
+python -m examples.simple documented_two_parameter_alt_syntax --help
 
 # verify we can call methods with the appropriate number of arguments
 python -m examples.simple no_parameters

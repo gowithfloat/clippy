@@ -110,6 +110,17 @@ def documented_one_typed_documented_parameter(arg: str):
 
 
 @clippy
+def documented_two_parameter_alt_syntax(arg1, arg2):
+    """
+    Returns a string containing the input arguments.
+    @param arg1: The first argument.
+    @param arg2: The second argument.
+    @return: The return value.
+    """
+    return f"documented_two_parameter_alt_syntax: {arg1} {arg2}"
+
+
+@clippy
 def typed_return() -> str:
     return "typed_return"
 
