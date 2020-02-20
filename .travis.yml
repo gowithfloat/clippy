@@ -68,9 +68,16 @@ after_success:
   - python -m coverage xml
   - python-codacy-coverage -r coverage.xml
 
-branches:
-  only:
-    - master
+deploy:
+  - provider: pypi
+    username: __token__
+    password:
+      secure: kdp4nqaUMDJs51eoC6cK0TQn8EZ5kRskjB6QKg/jfr3rfBKSIbU+dGv4hCPHWEDUtK2Tdsv8+bcgomSHWqf5Jy8AWyZxgX3ZI4yGfnG/voO37QxTQQOBQwniH5CfcueIb4PteMurlTgTaOUviFVLOji2mOnijEckuucsRvAep3VVjTG6tJ9VP5VodrR+UMhmJnf3s030tnxMiqksQmbPvQ7rH9+dtSfWhA95wdWCzDgl6UK4t7ge810gcBO0aoFC1q7fFBDdC3kqVfHlPlO8PuA7+nD32t5baxdzF8NN+A17iwgXPTAST2+OXWvEoPf/kd8mhQlwIYIrO/CFu9PwzA/r0XSFwGSkvdLmxqP/TucDIVpYVONvSMbKWRDhuVsVv7xHKPT9L6nEGayg9cjZXZGfxuWpl3snNErYZN9yzcvCfC9aORRzz00lhA5OqTeMelpSn3DpzcwGVP1d8RRX6hSXMucP3Ruc3AhHcqIbHi9XTp9uqouCbWkhMpfcxkHtSPbHoIROalSAyLTiu8nsokJSBNdwVZjB63MF2dCTzjfMiOu7Bg/t5sEymKVtN+2Z0c5r785+aYl89K/bs0buJENg7/bUycSa4Ferhp82OkDusrdBbo5BXqV65WY5iaGfRCQncG0ZQXCnAplisH5ZfZnJaVERQiixxtsAqD4XlBw=
+    on:
+      tags: true
+    skip_existing: true
+    allow_failure: false
+    skip_cleanup: true
 
 git:
   depth: 1
