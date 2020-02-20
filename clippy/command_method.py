@@ -161,7 +161,7 @@ class CommandMethod(CommandProtocol):
             result += "\n\nPositional arguments:"
 
             for param in self.required_params:
-                result += f"\t{right_pad(param.name, longest)}   {param.documentation}"
+                result += f"\n\t{right_pad(param.name, longest)}   {param.documentation}"
 
         result += "\n\nOptions:\n\t--{} {}".format(right_pad("help", longest), "Show this screen.")
 
