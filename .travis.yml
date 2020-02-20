@@ -4,42 +4,28 @@ matrix:
       os: linux
       language: python
       python: "3.6"
-      before_install:
-        - python --version
     - name: "Python 3.7 - Linux"
       os: linux
       language: python
       python: "3.7"
-      before_install:
-        - python --version
     - name: "Python 3.8 - Linux"
       os: linux
       language: python
       python: "3.8"
-      before_install:
-        - python --version
-      script:
-        - python -m unittest discover -s tests -v
     - name: "Python 3.6 - macOS"
       os: osx
       osx_image: xcode9.4
       language: shell
       before_install:
         - python3 --version
-      install:
-        - pip3 install -r requirements.txt
-      script:
-        - python3 -m unittest discover -s tests -v
+        - alias python=python3
     - name: "Python 3.7 - macOS"
       os: osx
       osx_image: xcode10.2
       language: shell
       before_install:
         - python3 --version
-      install:
-        - pip3 install -r requirements.txt
-      script:
-        - python3 -m unittest discover -s tests -v
+        - alias python=python3
     - name: "Python 3.8 - macOS"
       os: osx
       osx_image: xcode11
@@ -49,45 +35,34 @@ matrix:
         - brew update && brew upgrade pyenv
         - pyenv install 3.8.1
         - pyenv shell 3.8.1
-        - python --version
         - python -m pip install --upgrade pip
-      script:
-        - python -m unittest discover -s tests -v
     - name: "Python 3.6 - Windows"
       os: windows
       language: shell
       before_install:
         - choco install python --version 3.6.8
-        - python --version
         - python -m pip install --upgrade pip
-      script:
-        - python -m unittest discover -s tests -v
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
     - name: "Python 3.7 - Windows"
       os: windows
       language: shell
       before_install:
         - choco install python --version 3.7.4
-        - python --version
         - python -m pip install --upgrade pip
-      script:
-        - python -m unittest discover -s tests -v
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
     - name: "Python 3.8 - Windows"
       os: windows
       language: shell
       before_install:
         - choco install python --version 3.8.1
-        - python --version
         - python -m pip install --upgrade pip
-      script:
-        - python -m unittest discover -s tests -v
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 
 install:
-  - pip install --force-reinstall -r requirements.txt
+  - python -m pip install --force-reinstall -r requirements.txt
 
 script:
+  - python --version
   - bash test_examples.sh
   - mypy clippy ; flake8 clippy ; pylint clippy
   - coverage run -m unittest discover -s tests -v
