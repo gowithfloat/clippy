@@ -78,7 +78,7 @@ class TestCommandModule(unittest.TestCase):
         self.assertTrue(arg2 in output)
 
     def test_methods_in_module_help(self):
-        command_module = create_command_module_for_file("examples/simple.py")
+        command_module = create_command_module_for_file(os.path.join("examples", "simple.py"))
         output = command_module.help()
 
         for method in command_module.commands.values():
