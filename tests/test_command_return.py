@@ -18,23 +18,25 @@ class TestCommandReturn(unittest.TestCase):
         command_return = CommandReturn()
         self.assertIsNotNone(command_return)
 
-    def test_create_with_none(self):
-        command_return = CommandReturn(documentation=None,
-                                       annotation=None)
-        self.assertEqual(None, command_return.documentation)
+    @given(st.none(), st.none())
+    def test_create_with_none(self, doc, ann):
+        command_return = CommandReturn(documentation=doc,
+                                       annotation=ann)
+        self.assertEqual("No documentation provided.", command_return.documentation)
         self.assertEqual(None, command_return.annotation)
 
-    @given(st.text())
-    def test_create_with_docs(self, text):
+    @given(st.text().filter(lambda x: x), st.none())
+    def test_create_with_docs(self, text, non):
         command_return = CommandReturn(documentation=text,
-                                       annotation=None)
+                                       annotation=non)
         self.assertEqual(text, command_return.documentation)
         self.assertEqual(None, command_return.annotation)
 
-    def test_create_with_annotation(self):
-        command_return = CommandReturn(documentation=None,
+    @given(st.none())
+    def test_create_with_annotation(self, non):
+        command_return = CommandReturn(documentation=non,
                                        annotation=str)
-        self.assertEqual(None, command_return.documentation)
+        self.assertEqual("No documentation provided.", command_return.documentation)
         self.assertEqual(str, command_return.annotation)
 
     @given(st.integers())
