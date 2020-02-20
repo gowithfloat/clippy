@@ -66,7 +66,7 @@ def get_definition(name):
 
 
 def any_module_any_type() -> Iterable[type]:
-    for module in sys.modules.values():
+    for module in list(sys.modules.values()):
         for _, obj in inspect.getmembers(module):
             if inspect.isclass(obj):
                 yield obj
