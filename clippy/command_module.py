@@ -4,7 +4,7 @@
 """
 Defines a Python module and the functions it contains.
 """
-import inspect
+
 import os
 import importlib
 from types import ModuleType
@@ -49,12 +49,16 @@ class CommandModule(CommandProtocol):
         :param name: The name of the module.
         :param documentation: The documentation associated with the module. Optional. Defaults to "No documentation provided".
         :param version: The version information associated with the module. Optional. Defaults to "No version provided".
-        :param command_list: The commands available in the module. Optional. Defaults to an empty dictionary.
+        :param command_list: The commands available in the module. Optional. Defaults to an empty list.
         """
         super().__init__(name, documentation)
         self._has_version = bool(version)
         self._version = version if version else "No version provided."
-        self._command_list = {command.name: command for command in command_list}
+
+        if command_list:
+            self._command_list = {command.name: command for command in command_list}
+        else:
+            self._command_list = dict()
 
     def help(self) -> str:
         """
@@ -92,7 +96,7 @@ class CommandModule(CommandProtocol):
         return result.strip()
 
 
-def __create_command_module(imported_module: ModuleType, module_name: str, filename: str) -> CommandModule:
+def _create_command_module(imported_module: ModuleType, module_name: str, filename: str) -> CommandModule:
     """
     Internal method to create a new object to hold module information.
 
@@ -137,9 +141,9 @@ def create_command_module(index: int = 1) -> CommandModule:
     if not imported_module:
         raise ValueError(f"Unable to import module from stack frame: {parent_stack_frame}")
 
-    return __create_command_module(imported_module=imported_module,
-                                   module_name=getattr(imported_module.__spec__, "name"),
-                                   filename=parent_stack_frame.filename)
+    return _create_command_module(imported_module=imported_module,
+                                  module_name=getattr(imported_module.__spec__, "name"),
+                                  filename=parent_stack_frame.filename)
 
 
 def create_command_module_for_file(filename: str) -> CommandModule:
@@ -172,6 +176,6 @@ def create_command_module_for_file(filename: str) -> CommandModule:
     if not imported_module:
         raise ValueError(f"Unable to import module from file: {filename}")
 
-    return __create_command_module(imported_module=imported_module,
-                                   module_name=module_name,
-                                   filename=filename)
+    return _create_command_module(imported_module=imported_module,
+                                  module_name=module_name,
+                                  filename=filename)

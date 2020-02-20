@@ -31,5 +31,4 @@ class CommandReturn(CommandProtocol):
             if not isinstance(annotation, type):
                 raise TypeError("Parameter annotation must be a type, if provided.")
 
-        self._documentation = documentation
         self._annotation = annotation

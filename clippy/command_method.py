@@ -26,6 +26,7 @@ class CommandMethod(CommandProtocol):
 
     @property
     def has_params(self) -> bool:
+        """Returns true if this method has any parameters."""
         return bool(self._params)
 
     @property
@@ -206,7 +207,7 @@ def create_command_method(function_definition: FunctionDef, module: ModuleType) 
     func_annotations = func_impl.__annotations__
     default_args = get_default_args(func_impl)
 
-    params = list()
+    params: List[CommandParam] = list()
     func_args = function_definition.args.args
 
     for (idx, arg) in enumerate(func_args):
