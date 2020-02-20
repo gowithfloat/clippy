@@ -5,11 +5,14 @@
 Tests for general documentation format.
 """
 
+import os
 import unittest
+
+# noinspection PyProtectedMember
 from docopt import docopt, DocoptExit
 
 from clippy.command_method import CommandMethod
-from clippy.command_module import CommandModule, create_command_module, create_command_module_for_file
+from clippy.command_module import CommandModule, create_command_module_for_file
 from clippy.command_param import CommandParam
 from clippy.command_return import CommandReturn
 
@@ -63,14 +66,14 @@ class TestDocs(unittest.TestCase):
         self.assertEqual(result, output)
 
     def test_simple_method(self):
-        command_module = create_command_module_for_file("examples/simple.py")
+        command_module = create_command_module_for_file(os.path.join("examples", "simple.py"))
         command_method = command_module.commands["typed_return"]
         output = command_method.usage("some_module")
         result = read_doc_opt(output)
         self.assertEqual(result, output)
 
     def test_simple_module(self):
-        command_module = create_command_module_for_file("examples/simple.py")
+        command_module = create_command_module_for_file(os.path.join("examples", "simple.py"))
         output = command_module.usage()
         result = read_doc_opt(output)
         self.assertEqual(result, output)
