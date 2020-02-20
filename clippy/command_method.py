@@ -157,7 +157,7 @@ class CommandMethod(CommandProtocol):
         result = f"{self.documentation}\n\n{self.usage(module_name)}"
         longest = self.longest_param_name_length
 
-        if len(self.params) > 0:
+        if self.required_params:
             result += "\n\nPositional arguments:"
 
             for param in self.required_params:
