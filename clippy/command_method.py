@@ -88,11 +88,11 @@ class CommandMethod(CommandProtocol):
         :param parameters: The parameters to the function. Optional. Defaults to None.
         :param return_value: The return value of the function. Defaults to a return None object.
         """
-        if not callable(implementation):
-            raise TypeError("Implementation parameter must be callable.")
-
         if not implementation:
             raise ValueError("Implementation parameter is required.")
+
+        if not callable(implementation):
+            raise TypeError("Implementation parameter must be callable.")
 
         super().__init__(implementation.__name__, documentation)
 

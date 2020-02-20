@@ -132,14 +132,7 @@ def create_command_module(index: int = 1) -> CommandModule:
         raise TypeError("Parameter index must be an integer.")
 
     parent_stack_frame = get_parent_stack_frame(index + 1)
-
-    if not parent_stack_frame:
-        raise ValueError(f"Unable to load stack frame for index {index}")
-
     imported_module = get_module_impl(parent_stack_frame)
-
-    if not imported_module:
-        raise ValueError(f"Unable to import module from stack frame: {parent_stack_frame}")
 
     return _create_command_module(imported_module=imported_module,
                                   module_name=getattr(imported_module.__spec__, "name"),
@@ -157,10 +150,10 @@ def create_command_module_for_file(filename: str) -> CommandModule:
         raise ValueError("Parameter filename is required.")
 
     if not isinstance(filename, str):
-        raise TypeError(f"Parameter filename must be a str, recieved {type(filename)}")
+        raise TypeError(f"Parameter filename must be a str, received {type(filename)}")
 
     if not os.path.exists(filename):
-        raise ValueError(f"File not found: {filename}")
+        raise FileNotFoundError(f"File not found: {filename}")
 
     if os.path.isdir(filename):
         raise ValueError(f"Path is not file: {filename}")
@@ -168,13 +161,7 @@ def create_command_module_for_file(filename: str) -> CommandModule:
     # this is not a great way to get the module name from the filename
     module_name = ".".join(os.path.splitext(filename)[0].split(os.sep))
 
-    if not module_name:
-        raise ValueError(f"Unable to determine module name for file: {filename}")
-
     imported_module = importlib.import_module(module_name)
-
-    if not imported_module:
-        raise ValueError(f"Unable to import module from file: {filename}")
 
     return _create_command_module(imported_module=imported_module,
                                   module_name=module_name,

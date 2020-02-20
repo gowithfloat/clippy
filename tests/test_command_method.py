@@ -6,14 +6,17 @@ Tests for command_method.py
 """
 
 import ast
+import sys
 import importlib
 import inspect
 import unittest
 from ast import FunctionDef
+from typing import Iterable
 from hypothesis import given
 import hypothesis.strategies as st
 
-from clippy.command_method import create_command_method
+from clippy.command_method import create_command_method, CommandMethod
+from clippy.command_return import CommandReturn
 
 
 def test_method(arg1, arg2=None):
@@ -60,6 +63,17 @@ def get_definition(name):
             break
 
     return definition, module
+
+
+def any_module_any_type() -> Iterable[type]:
+    for module in sys.modules.values():
+        for _, obj in inspect.getmembers(module):
+            if inspect.isclass(obj):
+                yield obj
+
+
+def any_type():
+    return st.sampled_from(list(any_module_any_type())).map(lambda x: type(x.__name__, (), {})())
 
 
 class TestCommandMethod(unittest.TestCase):
@@ -212,6 +226,39 @@ class TestCommandMethod(unittest.TestCase):
         command_method = create_command_method(function_definition=definition,
                                                module=module)
         self.assertTrue(command_method.usage(txt) in command_method.help(txt))
+
+    @given(any_type().filter(lambda x: x and not callable(x)))
+    def test_not_callable(self, any_obj):
+        with self.assertRaises(TypeError) as err:
+            _ = CommandMethod(implementation=any_obj)
+
+        self.assertTrue("must be callable" in str(err.exception))
+
+    @given(st.none())
+    def test_no_implementation(self, non):
+        def invalid():
+            # noinspection PyTypeChecker
+            _ = CommandMethod(implementation=non)
+
+        self.assertRaises(ValueError, invalid)
+
+    @given(any_type().filter(lambda x: x and not isinstance(x, list)))
+    def test_parameters_not_list(self, any_obj):
+        with self.assertRaises(TypeError) as err:
+            # noinspection PyTypeChecker
+            _ = CommandMethod(implementation=test_method,
+                              parameters=any_obj)
+
+        self.assertTrue("must be a list" in str(err.exception))
+
+    @given(any_type().filter(lambda x: x and not isinstance(x, CommandReturn)))
+    def test_incorrect_return_type(self, any_obj):
+        with self.assertRaises(TypeError) as err:
+            # noinspection PyTypeChecker
+            _ = CommandMethod(implementation=test_method,
+                              return_value=any_obj)
+
+        self.assertTrue("must be a CommandReturn" in str(err.exception))
 
 
 if __name__ == "__main__":

@@ -4,6 +4,8 @@
 """
 Tests for common.py
 """
+
+import os
 import inspect
 import unittest
 
@@ -11,7 +13,8 @@ from hypothesis import given
 import hypothesis.strategies as st
 
 from clippy import clippy
-from clippy.common import string_remove, is_clippy_command, right_pad, function_docs_from_string, read_param_pair, parse_ast, get_parent_stack_frame, get_module_impl
+from clippy.common import string_remove, is_clippy_command, right_pad, function_docs_from_string, read_param_pair, parse_ast, get_parent_stack_frame, \
+    get_module_impl, remove_optional_prefix
 
 
 def not_clippy_method(arg):
@@ -133,7 +136,7 @@ class TestCommon(unittest.TestCase):
 
     def test_parse_empty_file(self):
         def invalid():
-            _ = parse_ast("tests/empty_file.py")
+            _ = parse_ast(os.path.join("tests", "empty_file.py"))
 
         self.assertRaises(ValueError, invalid)
 
@@ -209,6 +212,26 @@ class TestCommon(unittest.TestCase):
             # this simulates the scenario where we try to get a module without a module in the stack
             setattr(parent_module, "__spec__", None)
             _ = get_module_impl(parent_stack_frame)
+
+        self.assertRaises(ValueError, invalid)
+
+    @given(st.integers())
+    def test_remove_prefix_invalid_type(self, num):
+        def invalid():
+            _ = remove_optional_prefix(num)
+
+        self.assertRaises(TypeError, invalid)
+
+    @given(st.text().filter(lambda x: not x.startswith("--")))
+    def test_remove_prefix_no_prefix(self, txt):
+        def invalid():
+            _ = remove_optional_prefix(txt)
+
+        self.assertRaises(ValueError, invalid)
+
+    def test_remove_prefix_only_prefix(self):
+        def invalid():
+            _ = remove_optional_prefix("--")
 
         self.assertRaises(ValueError, invalid)
 

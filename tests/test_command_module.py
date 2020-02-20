@@ -18,6 +18,7 @@ from clippy.command_module import create_command_module, CommandModule, create_c
 __version__ = "0.0.1"
 
 from clippy.command_param import CommandParam
+from tests.test_command_method import any_type
 
 
 @clippy
@@ -83,6 +84,33 @@ class TestCommandModule(unittest.TestCase):
 
         for method in command_module.commands.values():
             self.assertTrue(method.name in output)
+
+    @given(st.none())
+    def test_create_command_module_for_file(self, non):
+        with self.assertRaises(ValueError) as err:
+            _ = create_command_module_for_file(non)
+
+        self.assertTrue("filename" in str(err.exception))
+
+    @given(any_type().filter(lambda x: x and not isinstance(x, str)))
+    def test_create_command_file_invalid(self, any_obj):
+        with self.assertRaises(TypeError) as err:
+            _ = create_command_module_for_file(any_obj)
+
+        self.assertTrue("filename" in str(err.exception))
+
+    @given(st.text(alphabet="0123456789abcdef").filter(lambda x: x))
+    def test_create_no_file(self, file):
+        with self.assertRaises(FileNotFoundError) as err:
+            _ = create_command_module_for_file(file)
+
+        self.assertTrue("File not found" in str(err.exception))
+
+    def test_create_folder(self):
+        with self.assertRaises(ValueError) as err:
+            _ = create_command_module_for_file("tests")
+
+        self.assertTrue("is not file" in str(err.exception))
 
 
 if __name__ == "__main__":

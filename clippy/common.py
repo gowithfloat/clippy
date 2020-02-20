@@ -139,7 +139,7 @@ def get_parent_stack_frame(index: int, stack: Optional[List[FrameInfo]] = None) 
         if not all(isinstance(el, FrameInfo) for el in stack):
             raise TypeError(f"Parameter stack must be a list of FrameInfo if provided")
 
-    if len(stack) < (index + 1):
+    if len(stack) <= (index + 1):
         raise ValueError(f"Stack is too shallow to retrieve index {index}")
 
     # get the previous stack frame
@@ -179,7 +179,7 @@ def remove_optional_prefix(text: str) -> str:
     :return: The parameter flag without prefix. Will throw if the string is invalid, such as "--".
     """
     if not isinstance(text, str):
-        raise ValueError(f"Not a string parameter flag: {text}")
+        raise TypeError(f"Not a string parameter flag: {text}")
 
     if not text.startswith("--"):
         raise ValueError(f"Invalid optional parameter flag: {text}")

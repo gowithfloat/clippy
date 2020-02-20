@@ -113,9 +113,31 @@ class TestCommandParam(unittest.TestCase):
     @given(st.text().filter(lambda x: x), st.integers())
     def test_no_annotation_name(self, nam, idx):
         command_param = CommandParam(name=nam,
+                                     index=idx,
+                                     annotation=None)
+        self.assertEqual(None, command_param.annotation_name)
+
+    @given(st.text().filter(lambda x: x), st.integers())
+    def test_no_annotation_name(self, nam, idx):
+        command_param = CommandParam(name=nam,
                                      index=idx)
         self.assertEqual(None, command_param.annotation)
         self.assertEqual(None, command_param.annotation_name)
+
+    @given(st.text().filter(lambda x: x), st.integers(), st.integers())
+    def test_no_annotation_name(self, nam, idx1, idx2):
+        def create_invalid():
+            # noinspection PyTypeChecker
+            _ = CommandParam(name=nam,
+                             index=idx1,
+                             default_args=idx2)
+
+        self.assertRaises(TypeError, create_invalid)
+
+    def test_missing_annotation(self):
+        command_param = CommandParam(name="name",
+                                     index=0)
+        self.assertIsNone(command_param.annotation_name)
 
 
 if __name__ == "__main__":
