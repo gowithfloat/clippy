@@ -61,9 +61,7 @@ class CommandModule(CommandProtocol):
             self._command_list = dict()
 
     def help(self) -> str:
-        """
-        Build a help message for this module.
-        """
+        """Build a help message for this module."""
         result = f"{self.documentation}\n\n{self.usage()}"
         result += f"\n\tpython -m {self.name} --help"
 
@@ -84,9 +82,7 @@ class CommandModule(CommandProtocol):
         return result
 
     def usage(self) -> str:
-        """
-        Build just the usage portion for this method's help message.
-        """
+        """Build just the usage portion for this method's help message."""
         result = "Usage:"
 
         for (key, val) in self.commands.items():
