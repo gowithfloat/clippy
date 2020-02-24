@@ -1,4 +1,6 @@
-# 👀📎 [Clippy](https://github.com/gowithfloat/clippy) [![PyPI Version](https://img.shields.io/pypi/v/Clippy)](https://pypi.org/project/Clippy) [![Python Versions](https://img.shields.io/pypi/pyversions/Clippy.svg)](https://pypi.org/project/Clippy) [![Travis Build Status](https://travis-ci.org/gowithfloat/clippy.svg?branch=master)](https://travis-ci.org/gowithfloat/clippy) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9f4ce3b0da144092b22c67ed96eb0692)](https://www.codacy.com/gh/gowithfloat/clippy) [![MIT](https://img.shields.io/pypi/l/Clippy)](https://github.com/gowithfloat/clippy/blob/master/license.md) [![codecov](https://codecov.io/gh/gowithfloat/clippy/branch/master/graph/badge.svg)](https://codecov.io/gh/gowithfloat/clippy)
+# 👀📎 [Clippy](https://github.com/gowithfloat/clippy) 
+
+[![PyPI Version](https://img.shields.io/pypi/v/Clippy)](https://pypi.org/project/Clippy) [![Python Versions](https://img.shields.io/pypi/pyversions/Clippy.svg)](https://pypi.org/project/Clippy) [![Travis Build Status](https://travis-ci.org/gowithfloat/clippy.svg?branch=master)](https://travis-ci.org/gowithfloat/clippy) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9f4ce3b0da144092b22c67ed96eb0692)](https://www.codacy.com/gh/gowithfloat/clippy) [![MIT](https://img.shields.io/pypi/l/Clippy)](https://github.com/gowithfloat/clippy/blob/master/license.md) [![codecov](https://codecov.io/gh/gowithfloat/clippy/branch/master/graph/badge.svg)](https://codecov.io/gh/gowithfloat/clippy)
 
 Clippy (Command Line Interface Parser for Python) crawls the abstract syntax tree (AST) of a Python file and generates a simple command-line interface.
 
@@ -100,6 +102,8 @@ If you'd like to create more comprehensive tools specifically for the command li
 -   [ ] Generate, validate, and upload docs
 -   [ ] Support nested commands, e.g. `python -m my_module parent_method child_method`
 -   [ ] Support Python 3.5
+-   [ ] Improved handling for list type command-line arguments
+-   [ ] Lazily evaluate methods to improve performance (often only one method needs parsed)
 
 ## License
 
