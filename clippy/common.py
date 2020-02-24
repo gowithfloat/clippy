@@ -235,7 +235,7 @@ def function_docs_from_string(docstring: str) -> Tuple[Optional[str], Optional[D
     if not all_docs:
         return None, None, None
 
-    has_return = filter(lambda x: ":return:" in x, all_docs)
+    has_return = bool(re.search("[@:]+return[s]?[@:]+", docstring))
     param_docs = dict()
 
     for doc in all_docs:
@@ -256,7 +256,7 @@ def function_docs_from_string(docstring: str) -> Tuple[Optional[str], Optional[D
 
     method_doc = None
 
-    if "param" not in all_docs[0] and "return" not in all_docs[0]:
+    if "param" not in all_docs[0] and not bool(re.search("[@:]+return[s]?[@:]+", all_docs[0])):
         method_doc = all_docs[0]
 
     return method_doc, param_docs, return_doc
