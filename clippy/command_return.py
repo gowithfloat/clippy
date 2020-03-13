@@ -39,5 +39,5 @@ class CommandReturn(CommandProtocol):
     def __repr__(self):
         if self._annotation:
             return f"{self.__class__.__name__}({self.documentation!r}, '{self.annotation.__name__}')"
-        else:
-            return f"{self.__class__.__name__}({self.documentation!r}, no annotation)"
+
+        return f"{self.__class__.__name__}({self.documentation!r}, no annotation)"

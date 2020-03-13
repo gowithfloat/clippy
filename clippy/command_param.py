@@ -90,9 +90,9 @@ class CommandParam(CommandProtocol):
         if self.annotation:
             return (f"{self.__class__.__name__}({self.name!r}, {self.index!r}, {self.documentation!r}, '{self.annotation.__name__}'"
                     f", {self.default_value}, {self.has_default})")
-        else:
-            return (f"{self.__class__.__name__}({self.name!r}, {self.index!r}, {self.documentation!r}"
-                    f", {self.default_value}, {self.has_default})")
+
+        return (f"{self.__class__.__name__}({self.name!r}, {self.index!r}, {self.documentation!r}"
+                f", {self.default_value}, {self.has_default})")
 
     def usage_docs(self, longest_param: int) -> str:
         """
