@@ -78,4 +78,9 @@ def begin_clippy(arguments: Optional[List[str]] = None) -> None:
     target_command.validate_arguments(param_pairs)
 
     # finally, invoke the desired command with all given arguments
-    print(target_command.call(param_pairs))
+    output = target_command.call(param_pairs)
+
+    if output is None:
+        print("Done.")
+    else:
+        print(output)
