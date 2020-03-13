@@ -9,3 +9,5 @@ dist
 .tox
 coverage.xml
 .hypothesis
+_build
+docs
