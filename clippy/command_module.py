@@ -10,6 +10,7 @@ import importlib
 from types import ModuleType
 from typing import Dict, Optional, List
 
+from .command_param import CommandParam
 from .command_method import CommandMethod, create_command_method
 from .command_protocols import CommandProtocol
 from .common import right_pad, get_function_definitions, get_parent_stack_frame, get_module_impl
@@ -32,6 +33,28 @@ class CommandModule(CommandProtocol):
     def has_version(self) -> bool:
         """Returns true if this module has version information, false otherwise."""
         return self._has_version
+
+    @property
+    def all_optional_params(self) -> List[CommandParam]:
+        """Returns all optional parameters from all commands in this module."""
+        params = {
+            "help": CommandParam("help", 1, "Show this screen.")
+        }
+
+        if self.has_version:
+            params["version"] = CommandParam("version", 0, "Show version information.")
+
+        for command in self.commands.values():
+            for param in command.optional_params:
+                if param.name in params.keys():
+                    if param == params[param.name]:
+                        continue
+                    else:
+                        params[param.name] = CommandParam(param.name, param.index, "Various values.")
+                else:
+                    params[param.name] = param
+
+        return list(params.values())
 
     @property
     def longest_param_name_length(self) -> int:
@@ -69,15 +92,10 @@ class CommandModule(CommandProtocol):
             result += f"\n\tpython -m {self.name} --version"
 
         longest = self.longest_param_name_length
+        result += "\n\nOptions:"
 
-        result += "\n\nOptions:\n\t--{} {}".format(right_pad("help", longest), "Show this screen.")
-
-        if self.has_version:
-            result += "\n\t--{} {}".format(right_pad("version", longest), "Show version information.")
-
-        for command in self.commands.values():
-            for param in command.optional_params:
-                result += f"\n\t--{right_pad(param.name, longest)} {param.documentation}"
+        for param in self.all_optional_params:
+            result += param.usage_docs(longest)
 
         return result
 

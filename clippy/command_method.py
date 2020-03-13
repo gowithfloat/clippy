@@ -13,7 +13,7 @@ from typing import Any, Callable, Dict, List, Optional
 from .command_param import CommandParam
 from .command_protocols import CommandProtocol
 from .command_return import CommandReturn
-from .common import right_pad, get_default_args, function_docs_from_string, read_param_pair
+from .common import right_pad, get_default_args, function_docs_from_string, read_param_pair, format_default
 
 
 class CommandMethod(CommandProtocol):
@@ -161,12 +161,12 @@ class CommandMethod(CommandProtocol):
             result += "\n\nPositional arguments:"
 
             for param in self.required_params:
-                result += f"\n\t{right_pad(param.name, longest)}   {param.documentation}"
+                result += param.usage_docs(longest)
 
         result += "\n\nOptions:\n\t--{} {}".format(right_pad("help", longest), "Show this screen.")
 
         for param in self.optional_params:
-            result += "\n\t--{} {}".format(right_pad(param.name, longest), param.documentation)
+            result += param.usage_docs(longest)
 
         return result
 

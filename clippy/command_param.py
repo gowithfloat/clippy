@@ -9,6 +9,7 @@ Defines one parameter in a function, including its name, documentation (if prese
 from typing import Any, Dict, Optional
 
 from clippy.command_protocols import CommandProtocol
+from .common import right_pad, format_default, format_param_doc
 
 
 class CommandParam(CommandProtocol):
@@ -36,6 +37,11 @@ class CommandParam(CommandProtocol):
     def has_default(self) -> bool:
         """Returns true if this parameter has a default value, false otherwise."""
         return self._has_default
+
+    @property
+    def default_value(self) -> any:
+        """Returns the default value. Note that default values may be None, so check `has_default` first."""
+        return self._default_value
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  name: str,
@@ -72,3 +78,19 @@ class CommandParam(CommandProtocol):
 
             self._default_value = default_args.get(name, None)
             self._has_default = name in default_args.keys()
+
+    def __eq__(self, other):
+        return [self.name, self.documentation, self.index, self.annotation, self.has_default, self.default_value] == \
+            [other.name, other.documentation, other.index, other.annotation, other.has_default, other.default_value]
+
+    def usage_docs(self, longest_param):
+        """
+        Returns formatted usage docs for this parameter, in "\n\t--(name) (description) [default]" format.
+
+        :param longest_param: Pass the length of the longest parameter name that will be printed so that descriptions are aligned.
+        :return: A formatted usage string.
+        """
+        if self.has_default:
+            return f"\n\t--{right_pad(self.name, longest_param)} {format_param_doc(self.documentation)} Default is {format_default(self.default_value)}."
+        else:
+            return f"\n\t--{right_pad(self.name, longest_param)} {format_param_doc(self.documentation)}"

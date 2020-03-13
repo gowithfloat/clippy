@@ -276,3 +276,29 @@ def get_default_args(func: Callable) -> Dict[str, Any]:
             result[key] = val.default
 
     return result
+
+
+def format_default(value: any) -> str:
+    """
+    Format a default parameter value for display in the usage documentation.
+
+    :param value: The value to format.
+    :return: A formatted string, with special handling of certain values to make them more clear.
+    """
+    if isinstance(value, str):
+        return f"\"{value}\""
+
+    return f"{value}"
+
+
+def format_param_doc(doc: str) -> str:
+    """
+    Applies some simple formatting to a parameter documentation string.
+
+    :param doc: The parameter documentation to format.
+    :return: The formatted string.
+    """
+    if not doc.endswith("."):
+        return f"{doc}."
+    else:
+        return doc
