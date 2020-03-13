@@ -46,11 +46,8 @@ class CommandModule(CommandProtocol):
 
         for command in self.commands.values():
             for param in command.optional_params:
-                if param.name in params.keys():
-                    if param == params[param.name]:
-                        continue
-                    else:
-                        params[param.name] = CommandParam(param.name, param.index, "Various values.")
+                if param.name in params.keys() and not param == params[param.name]:
+                    params[param.name] = CommandParam(param.name, param.index, "Various values.")
                 else:
                     params[param.name] = param
 
