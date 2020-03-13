@@ -180,7 +180,7 @@ class CommandMethod(CommandProtocol):
         result = f"Usage:\n\tpython -m {module_name} {self.name}"
 
         if self.has_params:
-            result += f"  {self.short_params}"
+            result += f" {self.short_params}"
 
         return result
 
