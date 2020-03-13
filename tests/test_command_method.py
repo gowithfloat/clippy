@@ -115,7 +115,7 @@ class TestCommandMethod(unittest.TestCase):
         definition, module = get_definition("test_method")
         command_method = create_command_method(function_definition=definition,
                                                module=module)
-        self.assertEqual(1, len(command_method.optional_params))
+        self.assertEqual(2, len(command_method.optional_params))
 
     def test_longest_param(self):
         definition, module = get_definition("test_method")

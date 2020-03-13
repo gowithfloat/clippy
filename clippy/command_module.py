@@ -10,10 +10,10 @@ import importlib
 from types import ModuleType
 from typing import Dict, Optional, List
 
-from .command_param import CommandParam
+from .command_param import CommandParam, DEFAULT_HELP_PARAM, DEFAULT_VERSION_PARAM
 from .command_method import CommandMethod, create_command_method
 from .command_protocols import CommandProtocol
-from .common import right_pad, get_function_definitions, get_parent_stack_frame, get_module_impl
+from .common import get_function_definitions, get_parent_stack_frame, get_module_impl
 
 
 class CommandModule(CommandProtocol):
@@ -38,11 +38,11 @@ class CommandModule(CommandProtocol):
     def all_optional_params(self) -> List[CommandParam]:
         """Returns all optional parameters from all commands in this module."""
         params = {
-            "help": CommandParam("help", 1, "Show this screen.")
+            "help": DEFAULT_HELP_PARAM
         }
 
         if self.has_version:
-            params["version"] = CommandParam("version", 0, "Show version information.")
+            params["version"] = DEFAULT_VERSION_PARAM
 
         for command in self.commands.values():
             for param in command.optional_params:

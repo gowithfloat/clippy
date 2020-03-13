@@ -10,10 +10,10 @@ from ast import FunctionDef
 from types import ModuleType
 from typing import Any, Callable, Dict, List, Optional
 
-from .command_param import CommandParam
+from .command_param import CommandParam, DEFAULT_HELP_PARAM
 from .command_protocols import CommandProtocol
 from .command_return import CommandReturn
-from .common import right_pad, get_default_args, function_docs_from_string, read_param_pair, format_default
+from .common import get_default_args, function_docs_from_string, read_param_pair
 
 
 class CommandMethod(CommandProtocol):
@@ -41,7 +41,7 @@ class CommandMethod(CommandProtocol):
         """Convenience accessor to get only parameters with a default value, sorted by index."""
         result = list(filter(lambda x: x.has_default, self._params.values()))
         result.sort(key=lambda x: x.index)
-        return result
+        return result + [DEFAULT_HELP_PARAM]
 
     @property
     def longest_param_name_length(self) -> int:
@@ -163,7 +163,7 @@ class CommandMethod(CommandProtocol):
             for param in self.required_params:
                 result += param.usage_docs(longest)
 
-        result += "\n\nOptions:\n\t--{} {}".format(right_pad("help", longest), "Show this screen.")
+        result += "\n\nOptions:"
 
         for param in self.optional_params:
             result += param.usage_docs(longest)

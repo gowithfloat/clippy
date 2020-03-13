@@ -94,3 +94,8 @@ class CommandParam(CommandProtocol):
             return f"\n\t--{right_pad(self.name, longest_param)} {format_param_doc(self.documentation)} Default is {format_default(self.default_value)}."
         else:
             return f"\n\t--{right_pad(self.name, longest_param)} {format_param_doc(self.documentation)}"
+
+
+# common default parameters are here
+DEFAULT_HELP_PARAM = CommandParam("help", 0, "Show this screen.", bool, {"help": False})
+DEFAULT_VERSION_PARAM = CommandParam("version", 0, "Show version information.", bool, {"version": False})
