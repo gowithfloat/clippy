@@ -39,7 +39,7 @@ class CommandParam(CommandProtocol):
         return self._has_default
 
     @property
-    def default_value(self) -> any:
+    def default_value(self) -> object:
         """Returns the default value. Note that default values may be None, so check `has_default` first."""
         return self._default_value
 
@@ -94,7 +94,7 @@ class CommandParam(CommandProtocol):
             return (f"{self.__class__.__name__}({self.name!r}, {self.index!r}, {self.documentation!r}"
                     f", {self.default_value}, {self.has_default})")
 
-    def usage_docs(self, longest_param):
+    def usage_docs(self, longest_param: int) -> str:
         """
         Returns formatted usage docs for this parameter, in "\n\t--(name) (description) [default]" format.
 

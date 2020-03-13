@@ -278,7 +278,7 @@ def get_default_args(func: Callable) -> Dict[str, Any]:
     return result
 
 
-def format_default(value: any) -> str:
+def format_default(value: object) -> str:
     """
     Format a default parameter value for display in the usage documentation.
 
