@@ -113,6 +113,12 @@ class CommandMethod(CommandProtocol):
 
         self._return = return_value if return_value else CommandReturn()
 
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.name!r}, {self.documentation!r}, {len(self.params)} parameters)"
+
     def parse_arguments(self, arguments: List[str]) -> Dict[str, Any]:
         """
         Parse the given list of arguments to generate pairs of argument names and values for this method.

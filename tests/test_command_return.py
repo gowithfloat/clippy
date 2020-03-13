@@ -12,6 +12,8 @@ import hypothesis.strategies as st
 
 from clippy.command_return import CommandReturn
 
+from tests.test_command_method import any_type
+
 
 class TestCommandReturn(unittest.TestCase):
     def test_create_empty(self):
@@ -54,6 +56,17 @@ class TestCommandReturn(unittest.TestCase):
             return CommandReturn(annotation=idx)
 
         self.assertRaises(TypeError, create_invalid)
+
+    @given(st.text().filter(lambda x: x), any_type())
+    def test_to_string(self, doc, typ):
+        expected = f"CommandReturn({doc!r}, '{type(typ).__name__}')"
+        command_return = CommandReturn(documentation=doc, annotation=type(typ))
+        self.assertEqual(expected, repr(command_return))
+        self.assertEqual(expected, str(command_return))
+        self.assertEqual(expected, command_return.__str__())
+        self.assertEqual(expected, command_return.__repr__())
+        self.assertEqual(expected, f"{command_return}")
+        self.assertEqual(expected, "{}".format(command_return))
 
 
 if __name__ == "__main__":

@@ -139,6 +139,16 @@ class TestCommandParam(unittest.TestCase):
                                      index=0)
         self.assertIsNone(command_param.annotation_name)
 
+    def test_to_string(self):
+        expected = "CommandParam('param', 3, 'Some parameter', 'int', 7, True)"
+        command_param = CommandParam("param", 3, "Some parameter", int, {"param": 7})
+        self.assertEqual(expected, repr(command_param))
+        self.assertEqual(expected, str(command_param))
+        self.assertEqual(expected, command_param.__str__())
+        self.assertEqual(expected, command_param.__repr__())
+        self.assertEqual(expected, f"{command_param}")
+        self.assertEqual(expected, "{}".format(command_param))
+
 
 if __name__ == "__main__":
     unittest.main()

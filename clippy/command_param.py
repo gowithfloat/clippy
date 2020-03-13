@@ -83,6 +83,17 @@ class CommandParam(CommandProtocol):
         return [self.name, self.documentation, self.index, self.annotation, self.has_default, self.default_value] == \
             [other.name, other.documentation, other.index, other.annotation, other.has_default, other.default_value]
 
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        if self.annotation:
+            return (f"{self.__class__.__name__}({self.name!r}, {self.index!r}, {self.documentation!r}, '{self.annotation.__name__}'"
+                    f", {self.default_value}, {self.has_default})")
+        else:
+            return (f"{self.__class__.__name__}({self.name!r}, {self.index!r}, {self.documentation!r}"
+                    f", {self.default_value}, {self.has_default})")
+
     def usage_docs(self, longest_param):
         """
         Returns formatted usage docs for this parameter, in "\n\t--(name) (description) [default]" format.

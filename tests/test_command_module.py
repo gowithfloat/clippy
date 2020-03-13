@@ -112,6 +112,16 @@ class TestCommandModule(unittest.TestCase):
 
         self.assertTrue("is not file" in str(err.exception))
 
+    def test_to_string(self):
+        expected = "CommandModule('test_command_module', 'Tests for command_module.py', 1 commands)"
+        command_module = create_command_module(index=0)
+        self.assertEqual(expected, repr(command_module))
+        self.assertEqual(expected, str(command_module))
+        self.assertEqual(expected, command_module.__str__())
+        self.assertEqual(expected, command_module.__repr__())
+        self.assertEqual(expected, f"{command_module}")
+        self.assertEqual(expected, "{}".format(command_module))
+
 
 if __name__ == "__main__":
     unittest.main()

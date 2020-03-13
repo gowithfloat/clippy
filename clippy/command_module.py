@@ -83,6 +83,12 @@ class CommandModule(CommandProtocol):
         else:
             self._command_list = dict()
 
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.name!r}, {self.documentation!r}, {len(self.commands)} commands)"
+
     def help(self) -> str:
         """Build a help message for this module."""
         result = f"{self.documentation}\n\n{self.usage()}"

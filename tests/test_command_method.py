@@ -263,6 +263,16 @@ class TestCommandMethod(unittest.TestCase):
 
         self.assertTrue("must be a CommandReturn" in str(err.exception))
 
+    def test_to_string(self):
+        expected = "CommandMethod('test_method', 'Some method', 0 parameters)"
+        command_method = CommandMethod(test_method, "Some method")
+        self.assertEqual(expected, repr(command_method))
+        self.assertEqual(expected, str(command_method))
+        self.assertEqual(expected, command_method.__str__())
+        self.assertEqual(expected, command_method.__repr__())
+        self.assertEqual(expected, f"{command_method}")
+        self.assertEqual(expected, "{}".format(command_method))
+
 
 if __name__ == "__main__":
     unittest.main()

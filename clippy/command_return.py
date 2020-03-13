@@ -32,3 +32,12 @@ class CommandReturn(CommandProtocol):
                 raise TypeError("Parameter annotation must be a type, if provided.")
 
         self._annotation = annotation
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        if self._annotation:
+            return f"{self.__class__.__name__}({self.documentation!r}, '{self.annotation.__name__}')"
+        else:
+            return f"{self.__class__.__name__}({self.documentation!r}, no annotation)"
