@@ -285,10 +285,16 @@ def format_default(value: object) -> str:
     :param value: The value to format.
     :return: A formatted string, with special handling of certain values to make them more clear.
     """
-    if isinstance(value, str):
-        return f"\"{value}\""
+    if isinstance(value, bool):
+        if value:
+            return f"Enabled by default."
 
-    return f"{value}"
+        return f"Disabled by default."
+
+    if isinstance(value, str):
+        return f"Default is \"{value}\""
+
+    return f"Default is {value}"
 
 
 def format_param_doc(doc: str) -> str:

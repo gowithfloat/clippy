@@ -102,9 +102,9 @@ class CommandParam(CommandProtocol):
         :return: A formatted usage string.
         """
         if self.has_default:
-            return f"\n\t--{right_pad(self.name, longest_param)} {format_param_doc(self.documentation)} Default is {format_default(self.default_value)}."
-        else:
-            return f"\n\t--{right_pad(self.name, longest_param)} {format_param_doc(self.documentation)}"
+            return f"\n\t--{right_pad(self.name, longest_param)} {format_param_doc(self.documentation)} {format_default(self.default_value)}"
+
+        return f"\n\t--{right_pad(self.name, longest_param)} {format_param_doc(self.documentation)}"
 
 
 # common default parameters are here
