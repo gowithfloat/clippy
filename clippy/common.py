@@ -306,5 +306,5 @@ def format_param_doc(doc: str) -> str:
     """
     if not doc.endswith("."):
         return f"{doc}."
-    else:
-        return doc
+
+    return doc
